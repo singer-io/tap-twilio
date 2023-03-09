@@ -155,8 +155,8 @@ STREAMS = {
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['end_time'],
-                'bookmark_query_field_from': 'EndTime>',  # Daily
-                'bookmark_query_field_to': 'EndTime<',
+                'bookmark_query_field_from': 'StartTime>',  # Daily
+                # 'bookmark_query_field_to': 'EndTime<',
                 'params': {},
                 'pagingation': 'root'
             },
