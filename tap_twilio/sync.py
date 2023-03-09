@@ -249,11 +249,11 @@ def sync_endpoint(
 
             # Get pagination details
             if data.get("next_page_uri"):
-                next_url = "https://api.twilio.com" + data["next_page_uri"]
+                next_url = endpoint_config.get("api_url") + data["next_page_uri"]
             else:
                 next_url = None
 
-            api_total = len(data.get(stream_name, []))
+            api_total = len(data.get(endpoint_config.get("data_key"), []))
             if not data or data is None:
                 total_records = 0
                 break  # No data results
