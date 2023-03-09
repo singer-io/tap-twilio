@@ -248,13 +248,13 @@ def sync_endpoint(
                 break  # No data results
 
             # Get pagination details
-            pagination = data.get('meta', {}).get('pagination', {})
-            api_total = int(pagination.get('total_results', 0))
-            if pagination.get('next', {}).get('rel') == 'next':
-                next_url = pagination.get('next', {}).get('href')
+            if data.get("next_page_uri"):
+                next_url = "https://api.twilio.com" + data["next_page_uri"]
             else:
                 next_url = None
-
+            LOGGER.info(data.get("next_page_uri"))
+            LOGGER.info(f"Next page value for {stream_name} is {next_url}")
+            api_total = len(data.get(stream_name, []))
             if not data or data is None:
                 total_records = 0
                 break  # No data results
@@ -329,6 +329,11 @@ def sync_endpoint(
                             # if we're syncing it. If it doesn't exist we just skip it below.
                             child_path = record.get('_subresource_uris', {})\
                                 .get(child_stream_name, None)
+
+                            if child_stream_name in ("usage_records", "usage_triggers"):
+                                if 'usage' in record.get('_subresource_uris', {}):
+                                    child_path = child_endpoint_config.get('path').format(ParentId=parent_id)
+
                             child_bookmark_field = next(iter(child_endpoint_config.get(
                                 'replication_keys', [])), None)
 
