@@ -1,7 +1,8 @@
 import os
 import json
-from singer import metadata
 from tap_twilio.streams import flatten_streams
+from singer.metadata import get_standard_metadata, to_list, to_map, write
+
 
 # Reference:
 # https://github.com/singer-io/getting-started/blob/master/docs/DISCOVERY_MODE.md#Metadata
@@ -19,18 +20,24 @@ def get_schemas():
         with open(schema_path) as file:
             schema = json.load(file)
         schemas[stream_name] = schema
-        mdata = metadata.new()
 
         # Documentation:
         # https://github.com/singer-io/getting-started/blob/master/docs/DISCOVERY_MODE.md#singer-python-helper-functions
         # Reference:
         # https://github.com/singer-io/singer-python/blob/master/singer/metadata.py#L25-L44
-        mdata = metadata.get_standard_metadata(
-            schema=schema,
-            key_properties=stream_metadata.get('key_properties', None),
-            valid_replication_keys=stream_metadata.get('replication_keys', None),
-            replication_method=stream_metadata.get('replication_method', None)
+        mdata = get_standard_metadata(
+            **{
+                "schema": schema,
+                "key_properties": stream_metadata.get('key_properties', None),
+                "valid_replication_keys": stream_metadata.get('replication_keys', None),
+                "replication_method": stream_metadata.get('replication_method', None),
+            }
         )
+        mdata = to_map(mdata)
+        if stream_metadata.get('replication_keys') is not None:
+            for key in stream_metadata.get('replication_keys'):
+                mdata = write(mdata, ("properties", key), "inclusion", "automatic")
+        mdata = to_list(mdata)
         field_metadata[stream_name] = mdata
 
     return schemas, field_metadata
