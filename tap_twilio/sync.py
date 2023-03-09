@@ -252,8 +252,7 @@ def sync_endpoint(
                 next_url = "https://api.twilio.com" + data["next_page_uri"]
             else:
                 next_url = None
-            LOGGER.info(data.get("next_page_uri"))
-            LOGGER.info(f"Next page value for {stream_name} is {next_url}")
+
             api_total = len(data.get(stream_name, []))
             if not data or data is None:
                 total_records = 0
