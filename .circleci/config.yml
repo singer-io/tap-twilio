@@ -2,35 +2,44 @@ version: 2
 jobs:
   build:
     docker:
-      - image: 218546966473.dkr.ecr.us-east-1.amazonaws.com/circle-ci:tap-tester-v4
+      - image: 218546966473.dkr.ecr.us-east-1.amazonaws.com/circle-ci:stitch-tap-tester
     steps:
       - checkout
       - run:
           name: 'Setup virtual env'
           command: |
-            python3 -mvenv /usr/local/share/virtualenvs/tap-twilio
+            python3 -m venv /usr/local/share/virtualenvs/tap-twilio
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
-            pip install -U 'pip<19.2' setuptools
+            pip install -U 'pip<19.2' 'setuptools<51.0.0'
             pip install .[dev]
+      - run:
+          name: 'pylint'
+          command: |
+            aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/tap_tester_sandbox dev_env.sh
+            source dev_env.sh
+            source /usr/local/share/virtualenvs/tap-twilio/bin/activate
+            pip install pylint
+            pylint tap_twilio -d "$PYLINT_DISABLE_LIST,logging-format-interpolation,raise-missing-from,
+            consider-using-min-builtin,unspecified-encoding,use-implicit-booleaness-not-comparison"
       - add_ssh_keys
+      - run:
+          name: 'JSON Validator'
+          command: |
+            source /usr/local/share/virtualenvs/tap-tester/bin/activate
+            stitch-validate-json tap_twilio/schemas/*.json
       - run:
           name: 'Integration Tests'
           command: |
-            aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/sandbox dev_env.sh
+            aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/tap_tester_sandbox dev_env.sh
             source dev_env.sh
             source /usr/local/share/virtualenvs/tap-tester/bin/activate
-            run-test --tap=tap-twilio \
-                       --target=target-stitch \
-                       --orchestrator=stitch-orchestrator \
-                       --email=harrison+sandboxtest@stitchdata.com \
-                       --password=$SANDBOX_PASSWORD \
-                       --client-id=50 \
-                       tests
+            run-test --tap=tap-twilio tests
 workflows:
   version: 2
   commit:
     jobs:
-      - build
+      - build:
+          context: circleci-user
   build_daily:
     triggers:
       - schedule:
@@ -40,4 +49,5 @@ workflows:
               only:
                 - master
     jobs:
-      - build
+      - build:
+          context: circleci-user
