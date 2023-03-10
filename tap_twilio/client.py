@@ -82,10 +82,10 @@ def raise_for_error(response):
                 error_message = '{}: {}, error code: {}, more info: {}, ERROR: {}'.format(
                     status, message, error_code, more_info, error)
                 ex = get_exception_for_status(status)
-                raise ex(error_message)
-            raise TwilioError(error)
-        except (ValueError, TypeError):
-            raise TwilioError(error)
+                raise ex(error_message) from error
+            raise TwilioError(error) from error
+        except (ValueError, TypeError) as exc:
+            raise TwilioError(error) from exc
 
 
 class TwilioClient:

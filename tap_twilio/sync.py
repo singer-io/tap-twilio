@@ -146,8 +146,8 @@ def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_fie
 
         # Set end window
         end_window = start_window + timedelta(days=date_window_days)
-        if end_window > now_datetime:
-            end_window = now_datetime
+        end_window = min(end_window, now_datetime)
+
     else:
         start_window = strptime_to_utc(last_datetime)
         end_window = now_datetime
@@ -377,8 +377,7 @@ def sync_endpoint(
 
             # to_rec: to record; ending record for the batch page
             to_rec = offset + limit
-            if to_rec > total_records:
-                to_rec = total_records
+            to_rec = min(to_rec, total_records)
 
             LOGGER.info('Synced Stream: {}, page: {}, {} to {} of total records: {}'.format(
                 stream_name,
@@ -459,7 +458,7 @@ def sync(client, config, catalog, state):
     LOGGER.info('Sync Parent Streams: {}'.format(parent_streams))
     LOGGER.info('Sync Child Streams: {}'.format(child_streams))
 
-    if not selected_streams or selected_streams == []:
+    if not selected_streams:
         return
 
     # Loop through endpoints in selected_streams

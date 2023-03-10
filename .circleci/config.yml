@@ -12,6 +12,11 @@ jobs:
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
             pip install -U 'pip<19.2' 'setuptools<51.0.0'
             pip install .[dev]
+      - run:
+          name: 'pylint'
+          command: |
+            source /usr/local/share/virtualenvs/tap-twilio/bin/activate
+            pylint tap_twilio -d $PYLINT_DISABLE_LIST, logging-format-interpolation
       - add_ssh_keys
       - run:
           name: 'JSON Validator'

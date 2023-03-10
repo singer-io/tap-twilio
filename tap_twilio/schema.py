@@ -15,7 +15,7 @@ def get_schemas():
     flat_streams = flatten_streams()
     for stream_name, stream_metadata in flat_streams.items():
         schema_path = get_abs_path('schemas/{}.json'.format(stream_name))
-        with open(schema_path) as file:
+        with open(schema_path, encoding="utf-8") as file:
             schema = json.load(file)
         schemas[stream_name] = schema
 
