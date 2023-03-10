@@ -44,7 +44,7 @@ STREAMS = {
                     'dependent_phone_numbers': {
                         'api_url': 'https://api.twilio.com',
                         'api_version': '2010-04-01',
-                        'path': 'Accounts/{ParentId}/Addresses/{ParentId}/DependentPhoneNumbers.json',
+                        'path': 'Accounts/{AccountSid}/Addresses/{ParentId}/DependentPhoneNumbers.json',
                         'data_key': 'dependent_phone_numbers',
                         'key_properties': ['sid'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
@@ -74,6 +74,7 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/AvailablePhoneNumbers.json',
                 'data_key': 'countries',
+                'sub_resource_key': 'available_phone_numbers',
                 'key_properties': ['country_code'],
                 'replication_method': 'FULL_TABLE',
                 'params': {},
@@ -86,6 +87,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/Local.json',
                         'data_key': 'available_phone_numbers',
+                        'sub_resource_key': 'local',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
@@ -99,6 +101,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/Mobile.json',
                         'data_key': 'available_phone_numbers',
+                        'sub_resource_key': 'mobile',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
@@ -112,6 +115,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/TollFree.json',
                         'data_key': 'available_phone_numbers',
+                        'sub_resource_key': 'toll_free',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
@@ -180,8 +184,9 @@ STREAMS = {
                     'conference_participants': {
                         'api_url': 'https://api.twilio.com',
                         'api_version': '2010-04-01',
-                        'path': 'Accounts/{ParentId}/Conferences/{ParentId}/Participants.json',
+                        'path': 'Accounts/{AccountSid}/Conferences/{ParentId}/Participants.json',
                         'data_key': 'participants',
+                        'sub_resource_key': 'participants',
                         'key_properties': ['uri'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Conference
                         'params': {},
@@ -213,7 +218,6 @@ STREAMS = {
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_created'],
                 'bookmark_query_field_from': 'DateCreated>',  # Daily
-                'bookmark_query_field_to': 'DateCreated<',
                 'params': {},
                 'pagingation': 'root'
             },
@@ -250,11 +254,11 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Messages.json',
                 'data_key': 'messages',
+                'sub_resource_key': 'media',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_sent'],
                 'bookmark_query_field_from': 'DateSent>',  # Daily
-                'bookmark_query_field_to': 'DateSent<',
                 'params': {},
                 'pagingation': 'root',
                 'children': {
@@ -282,8 +286,8 @@ STREAMS = {
                 'key_properties': ['account_sid', 'category', 'start_date'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['end_date'],
-                'bookmark_query_field_from': 'StartDate',  # Daily
-                'bookmark_query_field_to': 'EndDate',
+                'bookmark_query_field_from': 'start_date',  # Daily
+                'bookmark_query_field_to': 'end_date',
                 'params': {},
                 'pagingation': 'root'
             },
@@ -313,8 +317,8 @@ STREAMS = {
         'key_properties': ['sid'],
         'replication_method': 'INCREMENTAL',  # Filter query
         'replication_keys': ['date_updated'],
-        'bookmark_query_field_from': 'StartDate',  # Bookmark
-        'bookmark_query_field_to': 'EndDate',  # Current Date
+        'bookmark_query_field_from': 'start_date',  # Bookmark
+        'bookmark_query_field_to': 'end_date',  # Current Date
         'max_days_ago': 30,
         'params': {},
         'pagingation': 'meta'
