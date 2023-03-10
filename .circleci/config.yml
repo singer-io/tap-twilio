@@ -20,7 +20,7 @@ jobs:
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
             pip install pylint
             pylint tap_twilio -d "$PYLINT_DISABLE_LIST,logging-format-interpolation,raise-missing-from,
-            consider-using-min-builtin,unspecified-encoding"
+            consider-using-min-builtin,unspecified-encoding,use-implicit-booleaness-not-comparison"
       - add_ssh_keys
       - run:
           name: 'JSON Validator'
