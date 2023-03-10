@@ -41,7 +41,7 @@ class TestSyncNonReportStreams(unittest.TestCase):
         props = configuration['properties']
         for prop in props:
             properties_dict[prop] = os.getenv(props[prop])
-
+        properties_dict["start_date"] = "2023-01-01T00:00:00Z"
         return properties_dict
 
     def get_credentials(self):
