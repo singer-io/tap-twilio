@@ -16,6 +16,7 @@ jobs:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
+            echo "pylint will skip the following: $PYLINT_DISABLE_LIST"
             pylint tap_twilio -d "$PYLINT_DISABLE_LIST,logging-format-interpolation"
       - add_ssh_keys
       - run:
