@@ -254,7 +254,6 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Messages.json',
                 'data_key': 'messages',
-                'sub_resource_key': 'media',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_sent'],
@@ -269,6 +268,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/Messages/{ParentId}/Media.json',
                         'data_key': 'media_list',
+                        'sub_resource_key': 'media',
                         'key_properties': ['sid'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},

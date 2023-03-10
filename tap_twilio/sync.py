@@ -326,6 +326,7 @@ def sync_endpoint(
                             # their endpoints will be in the results,
                             # this will grab the child path for the child stream we're syncing,
                             # if we're syncing it. If it doesn't exist we just skip it below.
+                            child_path = None
                             if child_stream_name in ("usage_records", "usage_triggers"):
                                 if 'usage' in record.get('_subresource_uris', {}):
                                     child_path = child_endpoint_config.get('path').format(
