@@ -4,7 +4,6 @@ def config():
         "tap_name": "tap-twilio",
         "type": "platform.twilio",
         "properties": {
-            "start_date": "2023-01-01T00:00:00Z",
             "account_sid": "TWILIO_ACCOUNT_SID",
         },
         "credentials": {
