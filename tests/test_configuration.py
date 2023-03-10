@@ -4,11 +4,11 @@ def config():
         "tap_name": "tap-twilio",
         "type": "platform.twilio",
         "properties": {
-            "start_date": "TAP_TWILIO_START_DATE",
-            "account_sid": "TAP_TWILIO_ACCOUNT_SID",
+            "start_date": "2023-01-01T00:00:00Z",
+            "account_sid": "TWILIO_ACCOUNT_SID",
         },
         "credentials": {
-            "auth_token": "TAP_TWILIO_AUTH_TOKEN"
+            "auth_token": "TWILIO_AUTH_TOKEN"
         },
         "bookmark": {
             "bookmark_key": "accounts",

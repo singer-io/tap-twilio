@@ -8,11 +8,16 @@ jobs:
       - run:
           name: 'Setup virtual env'
           command: |
-            python3 -mvenv /usr/local/share/virtualenvs/tap-twilio
+            python3 -m venv /usr/local/share/virtualenvs/tap-twilio
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
-            pip install -U 'pip<19.2' setuptools
+            pip install -U 'pip<19.2' 'setuptools<51.0.0'
             pip install .[dev]
       - add_ssh_keys
+      - run:
+          name: 'JSON Validator'
+          command: |
+            source /usr/local/share/virtualenvs/tap-tester/bin/activate
+            stitch-validate-json tap_twilio/schemas/*.json
       - run:
           name: 'Integration Tests'
           command: |
@@ -30,7 +35,8 @@ workflows:
   version: 2
   commit:
     jobs:
-      - build
+      - build:
+          context: circleci-user
   build_daily:
     triggers:
       - schedule:
@@ -40,4 +46,5 @@ workflows:
               only:
                 - master
     jobs:
-      - build
+      - build:
+          context: circleci-user
