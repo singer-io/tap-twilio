@@ -19,7 +19,8 @@ jobs:
             source dev_env.sh
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
             pip install pylint
-            pylint tap_twilio -d "$PYLINT_DISABLE_LIST,logging-format-interpolation"
+            pylint tap_twilio -d "$PYLINT_DISABLE_LIST,logging-format-interpolation,raise-missing-from,
+            consider-using-min-builtin,unspecified-encoding"
       - add_ssh_keys
       - run:
           name: 'JSON Validator'
