@@ -22,7 +22,6 @@ STREAMS = {
         'data_key': 'accounts',
         'key_properties': ['sid'],
         'replication_method': 'FULL_TABLE',  # Fetch ALL, filter results
-        'replication_keys': ['date_updated'],
         'params': {},
         'pagination': 'root',
         'children': {
@@ -33,12 +32,10 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Addresses.json',
                 'data_key': 'addresses',
-                'sub_resource_key': 'addresses',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
                 'params': {},
-                'pagination': 'root',
                 'children': {
                     # pylint: disable=line-too-long
                     # Reference: https://www.twilio.com/docs/usage/api/address?code-sample=code-list-dependent-pns-subresources&code-language=curl&code-sdk-version=json#instance-subresources
@@ -62,12 +59,10 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Applications.json',
                 'data_key': 'applications',
-                'sub_resource_key': 'applications',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/phone-numbers/api/availablephonenumber-resource#read-a-list-of-countries
@@ -76,11 +71,9 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/AvailablePhoneNumbers.json',
                 'data_key': 'countries',
-                'sub_resource_key': 'available_phone_numbers',
                 'key_properties': ['country_code'],
                 'replication_method': 'FULL_TABLE',
                 'params': {},
-                'pagination': 'none',
                 'children': {
                     # pylint: disable=line-too-long
                     # Reference: https://www.twilio.com/docs/phone-numbers/api/availablephonenumberlocal-resource#read-multiple-availablephonenumberlocal-resources
@@ -89,11 +82,9 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/Local.json',
                         'data_key': 'available_phone_numbers',
-                        'sub_resource_key': 'local',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
-                        'pagination': 'root',
                         'activate_version': True
                     },
                     # pylint: disable=line-too-long
@@ -103,11 +94,9 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/Mobile.json',
                         'data_key': 'available_phone_numbers',
-                        'sub_resource_key': 'mobile',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
-                        'pagination': 'root',
                         'activate_version': True
                     },
                     # pylint: disable=line-too-long
@@ -117,11 +106,9 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/TollFree.json',
                         'data_key': 'available_phone_numbers',
-                        'sub_resource_key': 'toll_free',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
-                        'pagination': 'root',
                         'activate_version': True
                     }
                 }
@@ -133,12 +120,10 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/IncomingPhoneNumbers.json',
                 'data_key': 'incoming_phone_numbers',
-                'sub_resource_key': 'incoming_phone_numbers',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
-                'params': {},
-                'pagination': 'none'
+                'params': {}
             },
             # Reference: https://www.twilio.com/docs/usage/api/keys#read-a-key-resource
             'keys': {
@@ -146,12 +131,10 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Keys.json',
                 'data_key': 'keys',
-                'sub_resource_key': 'keys',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/sms/api/message-resource#read-multiple-message-resources
@@ -160,14 +143,12 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Calls.json',
                 'data_key': 'calls',
-                'sub_resource_key': 'calls',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['end_time'],
                 'bookmark_query_field_from': 'StartTime>',  # Daily
                 # 'bookmark_query_field_to': 'EndTime<',
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/voice/api/conference-resource#read-multiple-conference-resources
@@ -176,27 +157,23 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Conferences.json',
                 'data_key': 'conferences',
-                'sub_resource_key': 'conferences',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_updated'],
                 'bookmark_query_field_from': 'DateUpdated>',  # Daily
                 'bookmark_query_field_to': 'DateUpdated<',
                 'params': {},
-                'pagination': 'root',
                 'children': {
                     # pylint: disable=line-too-long
                     # Reference: https://www.twilio.com/docs/voice/api/conference-participant-resource#read-multiple-participant-resources
                     'conference_participants': {
                         'api_url': 'https://api.twilio.com',
                         'api_version': '2010-04-01',
-                        'path': 'Accounts/{ParentId}/Conferences/{ParentId}/Participants.json',
+                        'path': 'Accounts/{AccountSid}/Conferences/{ParentId}/Participants.json',
                         'data_key': 'participants',
-                        'sub_resource_key': 'participants',
                         'key_properties': ['uri'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Conference
-                        'params': {},
-                        'pagination': 'root'
+                        'params': {}
                     }
                 }
             },
@@ -207,12 +184,10 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/OutgoingCallerIds.json',
                 'data_key': 'outgoing_caller_ids',
-                'sub_resource_key': 'outgoing_caller_ids',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
-                'params': {},
-                'pagination': 'none'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/voice/api/recording#read-multiple-recording-resources
@@ -221,14 +196,12 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Recordings.json',
                 'data_key': 'recordings',
-                'sub_resource_key': 'recordings',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_created'],
                 'bookmark_query_field_from': 'DateCreated>',  # Daily
                 # 'bookmark_query_field_to': 'DateCreated<',
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/voice/api/recording-transcription?code-sample=code-read-list-all-transcriptions&code-language=curl&code-sdk-version=json#read-multiple-transcription-resources
@@ -237,12 +210,10 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Transcriptions.json',
                 'data_key': 'transcriptions',
-                'sub_resource_key': 'transcriptions',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/voice/api/queue-resource#read-multiple-queue-resources
@@ -251,12 +222,10 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Queues.json',
                 'data_key': 'queues',
-                'sub_resource_key': 'queues',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/sms/api/message-resource#read-multiple-message-resources
@@ -265,14 +234,12 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Messages.json',
                 'data_key': 'messages',
-                'sub_resource_key': 'messages',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_sent'],
                 'bookmark_query_field_from': 'DateSent>',  # Daily
                 # 'bookmark_query_field_to': 'DateSent<',
                 'params': {},
-                'pagination': 'root',
                 'children': {
                     # pylint: disable=line-too-long
                     # Reference: https://www.twilio.com/docs/sms/api/media-resource#read-multiple-media-resources
@@ -281,11 +248,9 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/Messages/{ParentId}/Media.json',
                         'data_key': 'media_list',
-                        'sub_resource_key': 'media',
                         'key_properties': ['sid'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
-                        'params': {},
-                        'pagination': 'root'
+                        'params': {}
                     }
                 }
             },
@@ -301,8 +266,7 @@ STREAMS = {
                 'replication_keys': ['end_date'],
                 'bookmark_query_field_from': 'start_date',  # Daily
                 'bookmark_query_field_to': 'end_date',
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/usage/api/usage-trigger#read-multiple-usagetrigger-resources
@@ -314,8 +278,7 @@ STREAMS = {
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
-                'params': {},
-                'pagination': 'root'
+                'params': {}
             },
 
         }
@@ -333,8 +296,7 @@ STREAMS = {
         'bookmark_query_field_from': 'start_date',  # Bookmark
         'bookmark_query_field_to': 'end_date',  # Current Date
         'max_days_ago': 30,
-        'params': {},
-        'pagination': 'meta'
+        'params': {}
     }
 }
 
