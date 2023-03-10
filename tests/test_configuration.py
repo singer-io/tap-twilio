@@ -11,7 +11,7 @@ def config():
         },
         "bookmark": {
             "bookmark_key": "addresses",
-            "bookmark_timestamp": "2020-03-15T14:30:31+0000"
+            "bookmark_timestamp": "2023-03-09T05:26:26.000000Z"
         },
         "streams": {
             "accounts": {"sid"},
