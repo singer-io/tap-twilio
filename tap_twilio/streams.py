@@ -23,7 +23,6 @@ STREAMS = {
         'key_properties': ['sid'],
         'replication_method': 'FULL_TABLE',  # Fetch ALL, filter results
         'params': {},
-        'pagination': 'root',
         'children': {
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/usage/api/address#read-multiple-address-resources
@@ -47,7 +46,6 @@ STREAMS = {
                         'key_properties': ['sid'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
-                        'pagination': 'root',
                         'parent': 'address'
                     }
                 }
