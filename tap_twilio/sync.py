@@ -326,7 +326,13 @@ def sync_endpoint(
                             # their endpoints will be in the results,
                             # this will grab the child path for the child stream we're syncing,
                             # if we're syncing it. If it doesn't exist we just skip it below.
-                            child_path = child_endpoint_config.get('path').format(ParentId=parent_id, AccountSid=config.get('account_sid'))
+                            if child_stream_name in ("usage_records", "usage_triggers"):
+                                if 'usage' in record.get('_subresource_uris', {}):
+                                    child_path = child_endpoint_config.get('path').format(ParentId=parent_id)
+                            elif child_stream_name == 'dependent_phone_numbers':
+                                child_path = child_endpoint_config.get('path').format(ParentId=parent_id, AccountSid=config.get('account_sid'))
+                            else:
+                                child_path = record.get('_subresource_uris', {}).get(child_endpoint_config.get('sub_resource_key', child_stream_name))
 
                             child_bookmark_field = next(iter(child_endpoint_config.get(
                                 'replication_keys', [])), None)

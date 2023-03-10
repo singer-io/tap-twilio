@@ -69,6 +69,7 @@ STREAMS = {
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/AvailablePhoneNumbers.json',
                 'data_key': 'countries',
+                'sub_resource_key': 'available_phone_numbers',
                 'key_properties': ['country_code'],
                 'replication_method': 'FULL_TABLE',
                 'params': {},
@@ -79,6 +80,7 @@ STREAMS = {
                         'api_url': 'https://api.twilio.com',
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/Local.json',
+                        'sub_resource_key': 'local',
                         'data_key': 'available_phone_numbers',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
@@ -92,6 +94,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/Mobile.json',
                         'data_key': 'available_phone_numbers',
+                        'sub_resource_key': 'mobile',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
@@ -104,6 +107,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/AvailablePhoneNumbers/{ParentId}/TollFree.json',
                         'data_key': 'available_phone_numbers',
+                        'sub_resource_key': 'toll_free',
                         'key_properties': ['iso_country', 'phone_number'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {},
@@ -169,6 +173,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/Conferences/{ParentId}/Participants.json',
                         'data_key': 'participants',
+                        'sub_resource_key':'participants',
                         'key_properties': ['uri'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Conference
                         'params': {}
@@ -246,6 +251,7 @@ STREAMS = {
                         'api_version': '2010-04-01',
                         'path': 'Accounts/{AccountSid}/Messages/{ParentId}/Media.json',
                         'data_key': 'media_list',
+                        'sub_resource_key': 'media',
                         'key_properties': ['sid'],
                         'replication_method': 'FULL_TABLE',  # ALL for parent Address
                         'params': {}
