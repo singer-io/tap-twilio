@@ -16,7 +16,7 @@ jobs:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
-            pylint tap_twilio -d $PYLINT_DISABLE_LIST, logging-format-interpolation
+            pylint tap_twilio -d "$PYLINT_DISABLE_LIST,logging-format-interpolation"
       - add_ssh_keys
       - run:
           name: 'JSON Validator'
