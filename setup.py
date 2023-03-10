@@ -13,6 +13,11 @@ setup(name='tap-twilio',
           'requests==2.23.0',
           'singer-python==5.13.0'
       ],
+      extras_require={
+          "dev": [
+              "pylint",
+            ]
+        },
       entry_points='''
           [console_scripts]
           tap-twilio=tap_twilio:main
