@@ -10,7 +10,7 @@ def config():
             "auth_token": "TWILIO_AUTH_TOKEN"
         },
         "bookmark": {
-            "bookmark_key": "accounts",
+            "bookmark_key": "addresses",
             "bookmark_timestamp": "2020-03-15T14:30:31+0000"
         },
         "streams": {
