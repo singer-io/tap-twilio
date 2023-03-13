@@ -158,8 +158,8 @@ STREAMS = {
                 'data_key': 'calls',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
-                'replication_keys': ['end_time'],
-                'bookmark_query_field_from': 'StartTime>',  # Daily
+                'replication_keys': ['date_updated'],
+                'bookmark_query_field_from': 'EndTime>',  # Daily
                 'params': {},
                 'pagingation': 'root'
             },
