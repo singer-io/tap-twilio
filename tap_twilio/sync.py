@@ -248,13 +248,12 @@ def sync_endpoint(
                 break  # No data results
 
             # Get pagination details
-            pagination = data.get('meta', {}).get('pagination', {})
-            api_total = int(pagination.get('total_results', 0))
-            if pagination.get('next', {}).get('rel') == 'next':
-                next_url = pagination.get('next', {}).get('href')
+            if data.get("next_page_uri"):
+                next_url = endpoint_config.get("api_url") + data["next_page_uri"]
             else:
                 next_url = None
 
+            api_total = len(data.get(endpoint_config.get("data_key"), []))
             if not data or data is None:
                 total_records = 0
                 break  # No data results
@@ -327,8 +326,18 @@ def sync_endpoint(
                             # their endpoints will be in the results,
                             # this will grab the child path for the child stream we're syncing,
                             # if we're syncing it. If it doesn't exist we just skip it below.
-                            child_path = record.get('_subresource_uris', {})\
-                                .get(child_stream_name, None)
+                            child_path = None
+                            if child_stream_name in ("usage_records", "usage_triggers"):
+                                if 'usage' in record.get('_subresource_uris', {}):
+                                    child_path = child_endpoint_config.get('path').format(
+                                        ParentId=parent_id)
+                            elif child_stream_name == 'dependent_phone_numbers':
+                                child_path = child_endpoint_config.get('path').format(
+                                    ParentId=parent_id, AccountSid=config.get('account_sid'))
+                            else:
+                                child_path = record.get('_subresource_uris', {}).get(
+                                    child_endpoint_config.get('sub_resource_key',
+                                                              child_stream_name))
                             child_bookmark_field = next(iter(child_endpoint_config.get(
                                 'replication_keys', [])), None)
 

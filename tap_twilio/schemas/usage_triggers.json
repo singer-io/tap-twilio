@@ -32,7 +32,8 @@
       "type": ["null", "string"]
     },
     "current_value": {
-      "type": ["null", "integer"]
+      "type": ["null", "number"],
+      "multipleOf": 1e-8
     },
     "date_created": {
       "type": ["null", "string"],
