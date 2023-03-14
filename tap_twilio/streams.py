@@ -29,7 +29,7 @@ STREAMS = {
                 'api_url': 'https://api.twilio.com',
                 'api_version': '2010-04-01',
                 'path': 'Accounts/{ParentId}/Balance.json',
-                'data_key': {},
+                'data_key': 'account_balance',
                 'sub_resource_key': 'balance',
                 'key_properties': ['account_sid'],
                 'replication_method': 'FULL_TABLE',
