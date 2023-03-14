@@ -194,7 +194,7 @@ class TwilioBaseTest(unittest.TestCase):
             "recordings": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.REPLICATION_KEYS: {"date_updated"},
+                self.REPLICATION_KEYS: {"date_created"},
                 self.EXPECTED_PAGE_SIZE: 50,
                 self.OBEYS_START_DATE: True,
                 self.EXPECTED_PARENT_STREAM: "accounts"
@@ -251,7 +251,7 @@ class TwilioBaseTest(unittest.TestCase):
         for k, v in self.expected_metadata().items():
 
             auto_fields[k] = (
-                v.get(self.PRIMARY_KEYS, set()) | v.get(self.REPLICATION_KEYS, set()) | v.get(self.FOREIGN_KEYS, set())
+                v.get(self.PRIMARY_KEYS, set()) | v.get(self.REPLICATION_KEYS, set())
             )
         return auto_fields
 
