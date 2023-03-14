@@ -59,7 +59,6 @@ class TwilioBaseTest(unittest.TestCase):
             "accounts": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
-                self.REPLICATION_KEYS: {"updated_at"},
                 self.EXPECTED_PAGE_SIZE: 1,
                 self.OBEYS_START_DATE: False
             },
@@ -170,7 +169,7 @@ class TwilioBaseTest(unittest.TestCase):
             "messages": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.REPLICATION_KEYS: {"date_sent"},
+                self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
                 self.OBEYS_START_DATE: True,
                 self.EXPECTED_PARENT_STREAM: "accounts"
