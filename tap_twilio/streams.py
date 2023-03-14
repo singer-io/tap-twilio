@@ -22,7 +22,6 @@ STREAMS = {
         'data_key': 'accounts',
         'key_properties': ['sid'],
         'replication_method': 'FULL_TABLE',  # Fetch ALL, filter results
-        'replication_keys': ['date_updated'],
         'params': {},
         'pagingation': 'root',
         'children': {
@@ -160,6 +159,7 @@ STREAMS = {
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_updated'],
                 'bookmark_query_field_from': 'EndTime>',  # Daily
+                'bookmark_query_field_to': 'EndTime<',
                 'params': {},
                 'pagingation': 'root'
             },
@@ -217,6 +217,7 @@ STREAMS = {
                 'replication_method': 'INCREMENTAL',  # Filter query
                 'replication_keys': ['date_created'],
                 'bookmark_query_field_from': 'DateCreated>',  # Daily
+                'bookmark_query_field_to': 'DateCreated<',
                 'params': {},
                 'pagingation': 'root'
             },
@@ -255,8 +256,9 @@ STREAMS = {
                 'data_key': 'messages',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
-                'replication_keys': ['date_sent'],
+                'replication_keys': ['date_updated'],
                 'bookmark_query_field_from': 'DateSent>',  # Daily
+                'bookmark_query_field_to': 'DateSent<',
                 'params': {},
                 'pagingation': 'root',
                 'children': {
