@@ -26,6 +26,16 @@ STREAMS = {
         'params': {},
         'pagingation': 'root',
         'children': {
+            'account_balance': {
+                'api_url': 'https://api.twilio.com',
+                'api_version': '2010-04-01',
+                'path': 'Accounts/{ParentId}/Balance.json',
+                'data_key': {},
+                'sub_resource_key': 'balance',
+                'key_properties': ['account_sid'],
+                'replication_method': 'FULL_TABLE',
+                'params': {}
+            },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/usage/api/address#read-multiple-address-resources
             'addresses': {
