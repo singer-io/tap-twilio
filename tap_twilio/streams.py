@@ -156,6 +156,7 @@ STREAMS = {
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
                 'params': {},
+                'parent': 'accounts',
                 'pagingation': 'root'
             },
             # pylint: disable=line-too-long

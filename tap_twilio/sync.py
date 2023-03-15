@@ -76,7 +76,10 @@ def process_records(catalog,  # pylint: disable=too-many-branches
         for record in records:
             # If child object, add parent_id to record
             if parent_id and parent:
-                record[parent + '_id'] = parent_id
+                if parent == 'accounts':
+                    record['account_sid'] = parent_id
+                else:
+                    record[parent + '_id'] = parent_id
 
             # Transform record for Singer.io
             with Transformer() as transformer:
