@@ -252,8 +252,10 @@ def sync_endpoint(
                 break  # No data results
 
             # Get pagination details
-            if data.get(endpoint_config.get('pagination_key', 'next_page_uri')):
-                next_url = endpoint_config.get("api_url") + data[endpoint_config.get('pagination_key', 'next_page_uri')]
+            # Next page url key in API response is different for alerts and remaining streams
+            next_url_key_in_api_response = endpoint_config.get('pagination_key', 'next_page_uri')
+            if data.get(next_url_key_in_api_response):
+                next_url = endpoint_config.get("api_url") + data[next_url_key_in_api_response]
             else:
                 next_url = None
 
