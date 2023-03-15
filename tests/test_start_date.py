@@ -25,7 +25,7 @@ class StartDateTest(TwilioBaseTest):
         """
 
         self.start_date_1 = self.get_properties()
-        self.start_date_2 = '2023-03-08T00:00:00Z'
+        self.start_date_2 = '2023-02-12T00:00:00Z'
         self.START_DATE = self.start_date_1
 
         ##########################################################################
@@ -89,6 +89,10 @@ class StartDateTest(TwilioBaseTest):
                 # Collect information for assertions from sync 1 and sync 2 based on expected values
                 record_count_sync_1 = record_count_by_stream_1.get(stream, 0)
                 record_count_sync_2 = record_count_by_stream_2.get(stream, 0)
+
+                # Verify both the syncs have extracted atleast one record
+                self.assertGreater(record_count_sync_1, 0, msg="First sync should sync at least 1 record for testing")
+                self.assertGreater(record_count_sync_2, 0, msg="Second sync should sync at least 1 record for testing")
 
                 if self.expected_replication_method()[stream] == self.INCREMENTAL:
 

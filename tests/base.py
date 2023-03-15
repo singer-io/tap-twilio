@@ -23,9 +23,9 @@ class TwilioBaseTest(unittest.TestCase):
     OBEYS_START_DATE = "obey-start-date"
     EXPECTED_PARENT_STREAM = "expected-parent-stream"
     START_DATE_FORMAT = "%Y-%m-%dT00:00:00Z"
-    BOOKMARK_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+    BOOKMARK_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
-    start_date = "2023-03-01T00:00:00Z"
+    start_date = "2023-02-01T00:00:00Z"
 
     # Skipping below streams beacuse they require a paid account to generate data
     NO_DATA_STREAMS = {"applications", "conference_participants", "dependent_phone_numbers", "transcriptions", "message_media"}
@@ -85,8 +85,7 @@ class TwilioBaseTest(unittest.TestCase):
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "alerts": {
                 self.PRIMARY_KEYS: {"sid"},
@@ -100,145 +99,126 @@ class TwilioBaseTest(unittest.TestCase):
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "available_phone_number_countries": {
                 self.PRIMARY_KEYS: {"country_code"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: False
             },
             "available_phone_numbers_local": {
                 self.PRIMARY_KEYS: {"iso_country", "phone_number"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
-                self.EXPECTED_PARENT_STREAM: "available_phone_number_countries"
+                self.OBEYS_START_DATE: False
             },
             "available_phone_numbers_mobile": {
                 self.PRIMARY_KEYS: {"iso_country", "phone_number"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
-                self.EXPECTED_PARENT_STREAM: "available_phone_number_countries"
+                self.OBEYS_START_DATE: False
             },
             "available_phone_numbers_toll_free": {
                 self.PRIMARY_KEYS: {"iso_country", "phone_number"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
-                self.EXPECTED_PARENT_STREAM: "available_phone_number_countries"
+                self.OBEYS_START_DATE: False
             },
             "calls": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "conference_participants": {
                 self.PRIMARY_KEYS: {"uri"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
-                self.EXPECTED_PARENT_STREAM: "conferences"
+                self.OBEYS_START_DATE: False
             },
             "conferences": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "dependent_phone_numbers": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
-                self.EXPECTED_PARENT_STREAM: "addresses"
+                self.OBEYS_START_DATE: False
             },
             "incoming_phone_numbers": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "keys": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "message_media": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
-                self.EXPECTED_PARENT_STREAM: "messages"
+                self.OBEYS_START_DATE: False
             },
             "messages": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "outgoing_caller_ids": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "queues": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "recordings": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_created"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "transcriptions": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "usage_records": {
                 self.PRIMARY_KEYS: {"account_sid", "category", "start_date"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"start_date"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             },
             "usage_triggers": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True,
-                self.EXPECTED_PARENT_STREAM: "accounts"
+                self.OBEYS_START_DATE: True
             }
         }
 
@@ -402,12 +382,6 @@ class TwilioBaseTest(unittest.TestCase):
 
             connections.select_catalog_and_fields_via_metadata(conn_id, catalog, schema, [], non_selected_properties)
 
-    def expected_child_streams(self):
-        return {
-            table: properties.get(self.EXPECTED_PARENT_STREAM, set())
-            for table, properties in self.expected_metadata().items()
-        }
-
     def calculated_states_by_stream(self, current_state):
         # {stream_name: [days, hours, minutes], ...}
         timedelta_by_stream = {stream: [5, 0, 0] for stream in self.expected_streams()}
@@ -426,4 +400,17 @@ class TwilioBaseTest(unittest.TestCase):
             stream_to_calculated_state[stream] = calculated_state_formatted
 
         return stream_to_calculated_state
+
+    @staticmethod
+    def assertIsDateFormat(value, str_format):
+        """
+        Assertion Method that verifies a string value is a formatted datetime with
+        the specified format.
+        """
+        try:
+            _ = dt.strptime(value, str_format)
+        except ValueError as err:
+            raise AssertionError(
+                f"Value does not conform to expected format: {str_format}"
+            ) from err
 

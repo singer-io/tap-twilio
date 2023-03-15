@@ -24,7 +24,7 @@ class AllFieldsTest(TwilioBaseTest):
         replicated
         """
 
-        # instantiate connection
+        # Instantiate connection
         conn_id = connections.ensure_connection(self)
 
         streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS
@@ -64,6 +64,9 @@ class AllFieldsTest(TwilioBaseTest):
                 # expected all fields
                 expected_all_fields = catalog_all_fields[stream]
 
+                # verify that we get some records for each stream
+                self.assertGreater(sync_record_count.get(stream), 0)
+
                 # collect actual fields
                 messages = sync_records.get(stream)
                 actual_all_fields = set()  # aggregate across all records
@@ -72,9 +75,6 @@ class AllFieldsTest(TwilioBaseTest):
                 ]
                 for fields in all_record_fields:
                     actual_all_fields.update(fields)
-
-                # verify that we get some records for each stream
-                self.assertGreater(sync_record_count.get(stream), 0)
 
                 # Verify that more than just the automatic fields are replicated for each stream
                 self.assertTrue(expected_automatic_fields.issubset(actual_all_fields),
