@@ -18,7 +18,7 @@ class BookmarksTest(TwilioBaseTest):
         - Verify 2nd sync respects the bookmark. All data of the 2nd sync is >= the bookmark
           from the first sync. The number of records in the 2nd sync is less then the first
         """
-        # instantiate connection
+        # Instantiate connection
         conn_id = connections.ensure_connection(self)
 
         streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS
@@ -28,7 +28,7 @@ class BookmarksTest(TwilioBaseTest):
         # Run check mode
         found_catalogs = self.run_and_verify_check_mode(conn_id)
 
-        # table and field selection
+        # Table and field selection
         test_catalogs_all_fields = [
             catalog for catalog in found_catalogs if catalog.get("tap_stream_id") in streams_to_test
         ]
@@ -68,10 +68,10 @@ class BookmarksTest(TwilioBaseTest):
         for stream in streams_to_test:
             with self.subTest(stream=stream):
 
-                # expected values
+                # Expected values
                 expected_replication_method = expected_replication_methods[stream]
 
-                # information required for assetions from sync 1 & 2 based on expected values
+                # Information required for assetions from sync 1 & 2 based on expected values
                 first_sync_count = first_sync_record_count.get(stream, 0)
                 second_sync_count = second_sync_record_count.get(stream, 0)
                 first_sync_messages = [
@@ -93,7 +93,7 @@ class BookmarksTest(TwilioBaseTest):
                     replication_key = next(iter(expected_replication_keys[stream]))
                     simulated_bookmark = new_state["bookmarks"][stream]
 
-                    # verify the syncs sets a bookmark of the expected form
+                    # Verify the bookmark incremental stremas is not None
                     self.assertIsNotNone(first_bookmark_value)
                     self.assertIsNotNone(second_bookmark_value)
 
@@ -101,15 +101,16 @@ class BookmarksTest(TwilioBaseTest):
                     self.assertIsInstance(first_bookmark_value, str)
                     self.assertIsInstance(second_bookmark_value, str)
 
+                    # Verify the bookmark has expected DATE_FORMAT
                     self.assertIsDateFormat(first_bookmark_value, self.BOOKMARK_DATE_FORMAT)
                     self.assertIsDateFormat(second_bookmark_value, self.BOOKMARK_DATE_FORMAT)
 
-                    # verify the 2nd bookmark is equal to 1st sync bookmark
+                    # Verify the 2nd bookmark is equal to 1st sync bookmark
                     self.assertEqual(first_bookmark_value, second_bookmark_value)
 
                     for record in first_sync_messages:
                         replication_key_value = record.get(replication_key)
-                        # verify 1st sync bookmark value is the max replication key value for a given stream
+                        # Verify 1st sync bookmark value is the max replication key value for a given stream
                         self.assertLessEqual(
                             replication_key_value,
                             first_bookmark_value,
@@ -118,20 +119,20 @@ class BookmarksTest(TwilioBaseTest):
 
                     for record in second_sync_messages:
                         replication_key_value = record.get(replication_key)
-                        # verify the 2nd sync replication key value is greater or equal to the 1st sync bookmarks
+                        # Verify the 2nd sync replication key value is greater or equal to the 1st sync bookmarks
                         self.assertGreaterEqual(
                             replication_key_value,
                             simulated_bookmark,
                             msg="Second sync records do not respect the previous bookmark",
                         )
-                        # verify the 2nd sync bookmark value is the max replication key value for a given stream
+                        # Verify the 2nd sync bookmark value is the max replication key value for a given stream
                         self.assertLessEqual(
                             replication_key_value,
                             second_bookmark_value,
                             msg="Second sync bookmark was set incorrectly, a record with a greater replication key value was synced",
                         )
 
-                    # verify that we get less data in the 2nd sync
+                    # Verify that we get less data in the 2nd sync
                     self.assertLessEqual(
                         second_sync_count,
                         first_sync_count,
@@ -140,11 +141,11 @@ class BookmarksTest(TwilioBaseTest):
 
                 elif expected_replication_method == self.FULL_TABLE:
 
-                    # verify the syncs do not set a bookmark for full table streams
+                    # Verify the syncs do not set a bookmark for full table streams
                     self.assertIsNone(first_bookmark_value)
                     self.assertIsNone(second_bookmark_value)
 
-                    # verify the number of records in the second sync is the same as the first
+                    # Verify the number of records in the second sync is the same as the first
                     self.assertEqual(second_sync_count, first_sync_count)
 
                 else:
