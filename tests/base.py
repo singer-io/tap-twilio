@@ -1,5 +1,8 @@
 import unittest
 import os
+from datetime import datetime as dt
+from datetime import timedelta
+import dateutil.parser
 from tap_tester import LOGGER, connections, menagerie, runner
 
 
@@ -30,8 +33,8 @@ class TwilioBaseTest(unittest.TestCase):
     # Below stream don't support pagination as we have less data
     NON_PAGINATION_STREAMS = {"accounts", "keys", "incoming_phone_numbers", "outgoing_caller_ids", "usage_triggers"}
 
-    # For below stream Twilio's API returns duplicate records
-    DUPLICATE_RECORD_STREAMS = {"addresses", "available_phone_numbers_toll_free"}
+    # For below stream Twilio's API returns duplicate records and moreover data for below stream gets generated automatically
+    DUPLICATE_RECORD_STREAMS = {"available_phone_numbers_toll_free"}
 
     @staticmethod
     def tap_name():
@@ -404,4 +407,23 @@ class TwilioBaseTest(unittest.TestCase):
             table: properties.get(self.EXPECTED_PARENT_STREAM, set())
             for table, properties in self.expected_metadata().items()
         }
+
+    def calculated_states_by_stream(self, current_state):
+        # {stream_name: [days, hours, minutes], ...}
+        timedelta_by_stream = {stream: [5, 0, 0] for stream in self.expected_streams()}
+
+        stream_to_calculated_state = {stream: "" for stream in current_state["bookmarks"].keys()}
+        for stream, state in current_state["bookmarks"].items():
+
+            state_as_datetime = dateutil.parser.parse(state)
+
+            days, hours, minutes = timedelta_by_stream[stream]
+            calculated_state_as_datetime = state_as_datetime - timedelta(days=days, hours=hours, minutes=minutes)
+
+            state_format = "%Y-%m-%dT00:00:00Z"
+            calculated_state_formatted = dt.strftime(calculated_state_as_datetime, state_format)
+
+            stream_to_calculated_state[stream] = calculated_state_formatted
+
+        return stream_to_calculated_state
 
