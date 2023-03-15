@@ -30,6 +30,9 @@ class TwilioBaseTest(unittest.TestCase):
     # Below stream don't support pagination as we have less data
     NON_PAGINATION_STREAMS = {"accounts", "keys", "incoming_phone_numbers", "outgoing_caller_ids", "usage_triggers"}
 
+    # For below stream Twilio's API returns duplicate records
+    DUPLICATE_RECORD_STREAMS = {"addresses", "available_phone_numbers_toll_free"}
+
     @staticmethod
     def tap_name():
         """The name of the tap."""
@@ -64,6 +67,12 @@ class TwilioBaseTest(unittest.TestCase):
         return {
             "accounts": {
                 self.PRIMARY_KEYS: {"sid"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+                self.EXPECTED_PAGE_SIZE: 1,
+                self.OBEYS_START_DATE: False
+            },
+            "account_balance": {
+                self.PRIMARY_KEYS: {"account_sid"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 1,
                 self.OBEYS_START_DATE: False
@@ -215,7 +224,7 @@ class TwilioBaseTest(unittest.TestCase):
             "usage_records": {
                 self.PRIMARY_KEYS: {"account_sid", "category", "start_date"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.REPLICATION_KEYS: {"end_date"},
+                self.REPLICATION_KEYS: {"start_date"},
                 self.EXPECTED_PAGE_SIZE: 50,
                 self.OBEYS_START_DATE: True,
                 self.EXPECTED_PARENT_STREAM: "accounts"

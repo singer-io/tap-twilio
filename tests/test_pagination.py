@@ -14,7 +14,7 @@ class PaginationTest(TwilioBaseTest):
         # instantiate connection
         conn_id = connections.ensure_connection(self)
 
-        streams_to_test = self.expected_streams()
+        streams_to_test = self.expected_streams() - self.DUPLICATE_RECORD_STREAMS
 
         # Run check mode
         found_catalogs = self.run_and_verify_check_mode(conn_id)

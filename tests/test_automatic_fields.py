@@ -23,7 +23,7 @@ class AutomaticFieldsTest(TwilioBaseTest):
         # instantiate connection
         conn_id = connections.ensure_connection(self)
 
-        streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS
+        streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS - self.DUPLICATE_RECORD_STREAMS
 
         # run check mode
         found_catalogs = self.run_and_verify_check_mode(conn_id)
