@@ -297,9 +297,8 @@ STREAMS = {
                 'data_key': 'usage_records',
                 'key_properties': ['account_sid', 'category', 'start_date'],
                 'replication_method': 'INCREMENTAL',  # Filter query
-                'replication_keys': ['end_date'],
-                'bookmark_query_field_from': 'start_date',  # Daily
-                'bookmark_query_field_to': 'end_date',
+                'replication_keys': ['start_date'],
+                'bookmark_query_field_from': 'StartDate',  # Daily
                 'params': {},
                 'pagingation': 'root'
             },
@@ -329,10 +328,11 @@ STREAMS = {
         'key_properties': ['sid'],
         'replication_method': 'INCREMENTAL',  # Filter query
         'replication_keys': ['date_updated'],
-        'bookmark_query_field_from': 'start_date',  # Bookmark
-        'bookmark_query_field_to': 'end_date',  # Current Date
+        'bookmark_query_field_from': 'StartDate',  # Bookmark
+        'bookmark_query_field_to': 'EndDate',
         'max_days_ago': 30,
         'params': {},
+        'pagination_key': 'next_page_url',
         'pagingation': 'meta'
     }
 }
