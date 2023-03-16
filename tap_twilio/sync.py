@@ -104,7 +104,7 @@ def process_records(catalog,  # pylint: disable=too-many-branches
                     bookmark_dttm = transform_datetime(transformed_record[bookmark_field])
                     # Keep only records whose bookmark is after the last_datetime
                     if bookmark_dttm:
-                        if bookmark_dttm > last_dttm:
+                        if bookmark_dttm >= last_dttm:
                             write_record(stream_name, transformed_record, \
                                          time_extracted=time_extracted)
                             counter.increment()
@@ -361,7 +361,7 @@ def sync_endpoint(
                                     selected_streams=selected_streams,
                                     # The child endpoint may be an endpoint that needs to window
                                     # so we'll re-pull from the config here (or pass in the default)
-                                    date_window_days=int(config.get('date_window_days', '30')),
+                                    date_window_days=int(config.get('date_window_days') or'30'),
                                     parent=child_endpoint_config.get('parent'),
                                     parent_id=parent_id,
                                     account_sid=account_sid)
@@ -492,7 +492,7 @@ def sync(client, config, catalog, state):
                 endpoint_config=endpoint_config,
                 bookmark_field=bookmark_field,
                 selected_streams=selected_streams,
-                date_window_days=int(config.get('date_window_days', '30')))
+                date_window_days=int(config.get('date_window_days') or '30'))
 
             update_currently_syncing(state, None)
             LOGGER.info('FINISHED Syncing: {}, total_records: {}'.format(
