@@ -33,8 +33,8 @@ class TwilioBaseTest(unittest.TestCase):
     # Below stream don't support pagination as we have less data
     NON_PAGINATION_STREAMS = {"accounts", "keys", "incoming_phone_numbers", "outgoing_caller_ids", "usage_triggers"}
 
-    # For below stream Twilio's API returns duplicate records and moreover data for below stream gets generated automatically
-    DUPLICATE_RECORD_STREAMS = {"available_phone_numbers_toll_free"}
+    # For below streams Twilio's API returns duplicate records and moreover data for below streams gets generated automatically
+    DUPLICATE_RECORD_STREAMS = {"available_phone_numbers_toll_free", "available_phone_numbers_mobile", "available_phone_numbers_local"}
 
     @staticmethod
     def tap_name():

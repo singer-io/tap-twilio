@@ -21,7 +21,7 @@ class BookmarksTest(TwilioBaseTest):
         # Instantiate connection
         conn_id = connections.ensure_connection(self)
 
-        streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS
+        streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS - self.DUPLICATE_RECORD_STREAMS
         expected_replication_keys = self.expected_replication_keys()
         expected_replication_methods = self.expected_replication_method()
 
@@ -155,6 +155,10 @@ class BookmarksTest(TwilioBaseTest):
 
                     # Verify the number of records in the second sync is the same as the first
                     self.assertEqual(second_sync_count, first_sync_count)
+
+                    # Verify both syncs have same records
+                    for record in first_sync_messages:
+                        self.assertIn(record, second_sync_messages)
 
                 else:
                     raise NotImplementedError(
