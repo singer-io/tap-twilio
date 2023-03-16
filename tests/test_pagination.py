@@ -1,3 +1,4 @@
+from math import ceil
 from base import TwilioBaseTest
 from tap_tester import LOGGER, connections, runner
 
@@ -39,8 +40,8 @@ class PaginationTest(TwilioBaseTest):
 
                 primary_keys = self.expected_primary_keys().get(stream)
 
+                stream_page_size = self.expected_page_limits()[stream]
                 if stream not in self.NO_DATA_STREAMS.union(self.NON_PAGINATION_STREAMS):
-                    stream_page_size = self.expected_page_limits()[stream]
                     self.assertLessEqual(stream_page_size, record_count)
 
                 # Verify there are no duplicates across pages
@@ -50,3 +51,22 @@ class PaginationTest(TwilioBaseTest):
                 ]
 
                 self.assertCountEqual(set(records_pks_list), records_pks_list, msg=f"We have duplicate records for {stream}")
+
+                # Chunk the replicated records (just primary keys) into expected pages
+                pages = []
+                page_count = ceil(len(records_pks_list) / stream_page_size)
+                for page_index in range(page_count):
+                    page_start = page_index * stream_page_size
+                    page_end = (page_index + 1) * stream_page_size
+                    pages.append(set(records_pks_list[page_start:page_end]))
+
+                # Verify by primary keys that data is unique for each page
+                for current_index, current_page in enumerate(pages):
+                    with self.subTest(current_page_primary_keys=current_page):
+
+                        for other_index, other_page in enumerate(pages):
+                            # don't compare the page to itself
+                            if current_index == other_index:
+                                continue
+
+                            self.assertTrue(current_page.isdisjoint(other_page), msg=f'other_page_primary_keys={other_page}')
