@@ -50,8 +50,7 @@ class AutomaticFieldsTest(TwilioBaseTest):
 
                 # Verify that you get some records for each stream
                 self.assertGreater(
-                    record_count_by_stream.get(stream, -1),
-                    0,
+                    record_count_by_stream.get(stream, -1), 0,
                     msg="The number of records is not over the stream max limit",
                 )
 
@@ -84,7 +83,9 @@ class AutomaticFieldsTest(TwilioBaseTest):
                 records_pks_set = set(records_pks_list)
 
                 # Verify there are no duplicate records
-                self.assertEqual(len(records), len(records_pks_set), msg=f"{stream} contains duplicate records")
+                self.assertEqual(
+                    len(records), len(records_pks_set),
+                    msg=f"{stream} contains duplicate records")
 
                 # Verify defined primary key is unique
                 self.assertEqual(

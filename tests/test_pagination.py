@@ -44,13 +44,9 @@ class PaginationTest(TwilioBaseTest):
                     self.assertLessEqual(stream_page_size, record_count)
 
                 # Verify there are no duplicates across pages
-                records_pks_set = {
-                    tuple(message.get("data").get(primary_key) for primary_key in primary_keys)
-                    for message in sync_messages
-                }
                 records_pks_list = [
                     tuple(message.get("data").get(primary_key) for primary_key in primary_keys)
                     for message in sync_messages
                 ]
 
-                self.assertCountEqual(records_pks_set, records_pks_list, msg=f"We have duplicate records for {stream}")
+                self.assertCountEqual(set(records_pks_list), records_pks_list, msg=f"We have duplicate records for {stream}")

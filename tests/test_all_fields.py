@@ -79,10 +79,6 @@ class AllFieldsTest(TwilioBaseTest):
                 # Verify that more than just the automatic fields are replicated for each stream
                 self.assertTrue(expected_automatic_fields.issubset(actual_all_fields),
                                 msg=f'{expected_automatic_fields-actual_all_fields} is not in "expected_all_keys"')
-                self.assertTrue(
-                    expected_automatic_fields.issubset(actual_all_fields),
-                    msg=f'{expected_automatic_fields-actual_all_fields} is not in "expected_all_keys"',
-                )
 
                 # verify all fields for each stream were replicated
                 self.assertSetEqual(expected_all_fields - self.MISSING_FIELDS.get(stream, set()), actual_all_fields)

@@ -65,6 +65,10 @@ class BookmarksTest(TwilioBaseTest):
         # Test by Stream
         ########################
 
+        # Verify currently syncing is set to None after successful sync
+        self.assertNotIn("currently_syncing", first_sync_bookmarks)
+        self.assertNotIn("currently_syncing", second_sync_bookmarks)
+
         for stream in streams_to_test:
             with self.subTest(stream=stream):
 
@@ -74,6 +78,10 @@ class BookmarksTest(TwilioBaseTest):
                 # Information required for assetions from sync 1 & 2 based on expected values
                 first_sync_count = first_sync_record_count.get(stream, 0)
                 second_sync_count = second_sync_record_count.get(stream, 0)
+
+                # Verify at least 1 record was replicated in the second sync
+                self.assertGreater(second_sync_count, 0, msg=f"We are not fully testing bookmarking for {stream}")
+
                 first_sync_messages = [
                     record.get("data")
                     for record in first_sync_records.get(stream, {}).get("messages", [])
@@ -154,6 +162,3 @@ class BookmarksTest(TwilioBaseTest):
                             stream, expected_replication_method
                         )
                     )
-
-                # Verify at least 1 record was replicated in the second sync
-                self.assertGreater(second_sync_count, 0, msg=f"We are not fully testing bookmarking for {stream}")
