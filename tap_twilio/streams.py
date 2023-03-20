@@ -25,6 +25,16 @@ STREAMS = {
         'params': {},
         'pagingation': 'root',
         'children': {
+            'account_balance': {
+                'api_url': 'https://api.twilio.com',
+                'api_version': '2010-04-01',
+                'path': 'Accounts/{ParentId}/Balance.json',
+                'data_key': 'account_balance',
+                'sub_resource_key': 'balance',
+                'key_properties': ['account_sid'],
+                'replication_method': 'FULL_TABLE',
+                'params': {}
+            },
             # pylint: disable=line-too-long
             # Reference: https://www.twilio.com/docs/usage/api/address#read-multiple-address-resources
             'addresses': {
@@ -146,6 +156,7 @@ STREAMS = {
                 'replication_method': 'INCREMENTAL',  # Fetch ALL, filter results
                 'replication_keys': ['date_updated'],
                 'params': {},
+                'parent': 'accounts',
                 'pagingation': 'root'
             },
             # pylint: disable=line-too-long
@@ -286,9 +297,8 @@ STREAMS = {
                 'data_key': 'usage_records',
                 'key_properties': ['account_sid', 'category', 'start_date'],
                 'replication_method': 'INCREMENTAL',  # Filter query
-                'replication_keys': ['end_date'],
-                'bookmark_query_field_from': 'start_date',  # Daily
-                'bookmark_query_field_to': 'end_date',
+                'replication_keys': ['start_date'],
+                'bookmark_query_field_from': 'StartDate',  # Daily
                 'params': {},
                 'pagingation': 'root'
             },
@@ -318,10 +328,11 @@ STREAMS = {
         'key_properties': ['sid'],
         'replication_method': 'INCREMENTAL',  # Filter query
         'replication_keys': ['date_updated'],
-        'bookmark_query_field_from': 'start_date',  # Bookmark
-        'bookmark_query_field_to': 'end_date',  # Current Date
+        'bookmark_query_field_from': 'StartDate',  # Bookmark
+        'bookmark_query_field_to': 'EndDate',
         'max_days_ago': 30,
         'params': {},
+        'pagination_key': 'next_page_url',
         'pagingation': 'meta'
     }
 }

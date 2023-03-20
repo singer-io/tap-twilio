@@ -2,9 +2,7 @@
 
 import sys
 import json
-import argparse
 import singer
-from singer import metadata, utils
 from tap_twilio.client import TwilioClient
 from tap_twilio.discover import discover
 from tap_twilio.sync import sync
@@ -14,8 +12,7 @@ LOGGER = singer.get_logger()
 REQUIRED_CONFIG_KEYS = [
     'account_sid',
     'auth_token',
-    'start_date',
-    'user_agent'
+    'start_date'
 ]
 
 def do_discover():
