@@ -308,7 +308,8 @@ def sync_endpoint(
             children = endpoint_config.get('children')
             if children:
                 for child_stream_name, child_endpoint_config in children.items():
-                    # will this work if only grandchildren are selected
+                    # Following check will make sure tap extracts the data for all the child streams
+                    # even if the parent isn't selected
                     if child_stream_name in selected_streams or child_stream_name in required_streams:
                         LOGGER.info('START Syncing: {}'.format(child_stream_name))
                         write_schema(catalog, child_stream_name)

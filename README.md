@@ -9,7 +9,7 @@ This tap:
 - Pulls raw data from the [twilio Advertiser API]([xxx](https://support.twilio.com/s/advertiser-api-documentation))
 - Extracts the following resources:
 - [accounts](https://www.twilio.com/docs/usage/api/account#read-multiple-account-resources)
-  - [account_balance]()
+  - [account_balance](https://www.twilio.com/docs/usage/api/account#read-multiple-account-resources)
   - [addresses](https://www.twilio.com/docs/usage/api/address#read-multiple-address-resources)
     - [dependent_phone_numbers](https://www.twilio.com/docs/usage/api/address?code-sample=code-list-dependent-pns-subresources&code-language=curl&code-sdk-version=json#instance-subresources)
   - [applications](https://www.twilio.com/docs/usage/api/applications#read-multiple-application-resources)
@@ -47,7 +47,7 @@ This tap:
 - Transformations: subresources_to_array
 
 
-[account_balance]()
+[account_balance](https://www.twilio.com/docs/usage/api/account#read-multiple-account-resources)
 - Endpoint: https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Balance.json
 - Parent: accounts
 - Primary key fields: account_sid
