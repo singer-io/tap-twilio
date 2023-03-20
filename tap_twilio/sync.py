@@ -85,7 +85,7 @@ def process_records(catalog,  # pylint: disable=too-many-branches
             with Transformer() as transformer:
                 try:
                     transformed_record = transformer.transform(
-                        record,
+                        dict(record),
                         schema,
                         stream_metadata)
                 except Exception as err:
@@ -176,7 +176,8 @@ def sync_endpoint(
         date_window_days=None,
         parent=None,
         parent_id=None,
-        account_sid=None):
+        account_sid=None,
+        required_streams=None):
     static_params = endpoint_config.get('params', {})
     bookmark_query_field_from = endpoint_config.get('bookmark_query_field_from')
     bookmark_query_field_to = endpoint_config.get('bookmark_query_field_to')
@@ -308,7 +309,7 @@ def sync_endpoint(
             if children:
                 for child_stream_name, child_endpoint_config in children.items():
                     # will this work if only grandchildren are selected
-                    if child_stream_name in selected_streams:
+                    if child_stream_name in selected_streams or child_stream_name in required_streams:
                         LOGGER.info('START Syncing: {}'.format(child_stream_name))
                         write_schema(catalog, child_stream_name)
                         # For each parent record
@@ -339,7 +340,7 @@ def sync_endpoint(
                                         ParentId=parent_id)
                             elif child_stream_name == 'dependent_phone_numbers':
                                 child_path = child_endpoint_config.get('path').format(
-                                    ParentId=parent_id, AccountSid=config.get('account_sid'))
+                                    ParentId=parent_id, AccountSid=record.get('account_sid'))
                             else:
                                 child_path = record.get('_subresource_uris', {}).get(
                                     child_endpoint_config.get('sub_resource_key',
@@ -364,7 +365,8 @@ def sync_endpoint(
                                     date_window_days=int(config.get('date_window_days') or'30'),
                                     parent=child_endpoint_config.get('parent'),
                                     parent_id=parent_id,
-                                    account_sid=account_sid)
+                                    account_sid=account_sid,
+                                    required_streams=required_streams)
                             else:
                                 LOGGER.info(
                                     'No child stream {} for parent stream {} in subresource uris'
@@ -492,7 +494,8 @@ def sync(client, config, catalog, state):
                 endpoint_config=endpoint_config,
                 bookmark_field=bookmark_field,
                 selected_streams=selected_streams,
-                date_window_days=int(config.get('date_window_days') or '30'))
+                date_window_days=int(config.get('date_window_days') or '30'),
+                required_streams=required_streams)
 
             update_currently_syncing(state, None)
             LOGGER.info('FINISHED Syncing: {}, total_records: {}'.format(
