@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.1
+  * Fix Dependabot issue [#9](https://github.com/singer-io/tap-twilio/pull/9)
+
 ## 0.1.0
   * Fixes following issues [#7](https://github.com/singer-io/tap-twilio/pull/7)
       * Adds `emergency_address_status` field to `incoming_phone_numbers` stream 
