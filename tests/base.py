@@ -28,7 +28,7 @@ class TwilioBaseTest(unittest.TestCase):
     start_date = "2023-02-01T00:00:00Z"
 
     # Skipping below streams beacuse they require a paid account to generate data
-    NO_DATA_STREAMS = {"applications", "conference_participants", "dependent_phone_numbers", "transcriptions", "message_media"}
+    NO_DATA_STREAMS = {"applications", "conference_participants", "dependent_phone_numbers", "transcriptions", "message_media", "messages", "alerts", "calls", "incoming_phone_numbers"}
 
     # Below stream don't support pagination as we have less data
     NON_PAGINATION_STREAMS = {"accounts", "keys", "incoming_phone_numbers", "outgoing_caller_ids", "usage_triggers"}
