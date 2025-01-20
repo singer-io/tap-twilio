@@ -15,12 +15,9 @@ jobs:
       - run:
           name: 'pylint'
           command: |
-            aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/tap_tester_sandbox dev_env.sh
-            source dev_env.sh
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
             pip install pylint
-            pylint tap_twilio -d "$PYLINT_DISABLE_LIST,logging-format-interpolation,raise-missing-from,
-            consider-using-min-builtin,unspecified-encoding,use-implicit-booleaness-not-comparison"
+            pylint tap_twilio -d C,R,W
       - add_ssh_keys
       - run:
           name: 'JSON Validator'

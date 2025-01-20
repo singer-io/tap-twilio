@@ -313,6 +313,7 @@ def sync_endpoint(
                     if child_stream_name in selected_streams or child_stream_name in required_streams:
                         LOGGER.info('START Syncing: {}'.format(child_stream_name))
                         write_schema(catalog, child_stream_name)
+                        parent_id_field = None
                         # For each parent record
                         for record in transformed_data:
                             i = 0
@@ -436,8 +437,7 @@ def update_currently_syncing(state, stream_name):
 
 
 def sync(client, config, catalog, state):
-    if 'start_date' in config:
-        start_date = config['start_date']
+    start_date = config['start_date']
 
     # Get selected_streams from catalog, based on state last_stream
     #   last_stream = Previous currently synced stream, if the load was interrupted
