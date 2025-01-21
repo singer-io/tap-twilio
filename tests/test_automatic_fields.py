@@ -1,11 +1,12 @@
 import json
 
 import base
+from base import TwilioBaseTest
 from tap_tester import LOGGER, connections, runner
 
 
 
-class AutomaticFieldsTest(base.TwilioBaseTest):
+class AutomaticFieldsTest(TwilioBaseTest):
     def name(self):
         return "tap_twilio_automatic_fields_test"
 

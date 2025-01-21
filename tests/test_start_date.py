@@ -1,8 +1,9 @@
 import base
+from base import TwilioBaseTest
 from tap_tester import connections, runner, LOGGER
 
 
-class StartDateTest(base.TwilioBaseTest):
+class StartDateTest(TwilioBaseTest):
 
     # Creating variables to store two different start dates
 

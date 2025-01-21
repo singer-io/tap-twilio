@@ -1,8 +1,9 @@
 import base
+from base import TwilioBaseTest
 from tap_tester import LOGGER, connections, menagerie, runner
 
 
-class BookmarksTest(base.TwilioBaseTest):
+class BookmarksTest(TwilioBaseTest):
     def name(self):
         return "tap_twilio_bookmarks_test"
 

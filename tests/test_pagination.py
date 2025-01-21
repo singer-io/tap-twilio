@@ -1,9 +1,10 @@
 from math import ceil
 import base
+from base import TwilioBaseTest
 from tap_tester import LOGGER, connections, runner
 
 
-class PaginationTest(base.TwilioBaseTest):
+class PaginationTest(TwilioBaseTest):
     def name(self):
         return "tap_twilio_pagination_test"
 

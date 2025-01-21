@@ -1,8 +1,9 @@
 import base
+from base import TwilioBaseTest
 from tap_tester import LOGGER, connections, menagerie, runner
 
 
-class AllFieldsTest(base.TwilioBaseTest):
+class AllFieldsTest(TwilioBaseTest):
 
     # Skipping following fields since we are not able to generate test data
     MISSING_FIELDS = {

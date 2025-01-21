@@ -3,7 +3,12 @@ import os
 from datetime import datetime as dt
 from datetime import timedelta
 import dateutil.parser
+
 from tap_tester import LOGGER, connections, menagerie, runner
+from tap_tester.jira_client import JiraClient as jira_client
+from tap_tester.jira_client import CONFIGURATION_ENVIRONMENT as jira_config
+
+JIRA_CLIENT = jira_client({ **jira_config })
 
 
 class TwilioBaseTest(unittest.TestCase):
