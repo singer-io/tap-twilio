@@ -33,7 +33,14 @@ class TwilioBaseTest(unittest.TestCase):
     start_date = "2023-02-01T00:00:00Z"
 
     # Skipping below streams beacuse they require a paid account to generate data
-    NO_DATA_STREAMS = {"applications", "conference_participants", "dependent_phone_numbers", "transcriptions", "message_media", "messages", "alerts", "calls", "incoming_phone_numbers"}
+    NO_DATA_STREAMS = {"applications", "conference_participants", "dependent_phone_numbers", \
+                   "transcriptions", "message_media", "messages", "alerts", \
+                   "calls", "incoming_phone_numbers"}
+
+    # Fail the test when the JIRA card is done to allow streams to be re-added and tested
+    jira_status = JIRA_CLIENT.get_status_category('TDL-26951')
+    if jira_status == 'done':
+        raise AssertionError('JIRA ticket has moved to done, re-add the NO_DATA_STREAMS defined to the testable streams')
 
     # Below stream don't support pagination as we have less data
     NON_PAGINATION_STREAMS = {"accounts", "keys", "incoming_phone_numbers", "outgoing_caller_ids", "usage_triggers"}
