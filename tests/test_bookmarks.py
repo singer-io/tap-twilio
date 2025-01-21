@@ -1,8 +1,8 @@
-from base import TwilioBaseTest
+import base
 from tap_tester import LOGGER, connections, menagerie, runner
 
 
-class BookmarksTest(TwilioBaseTest):
+class BookmarksTest(base.TwilioBaseTest):
     def name(self):
         return "tap_twilio_bookmarks_test"
 
@@ -22,6 +22,10 @@ class BookmarksTest(TwilioBaseTest):
         conn_id = connections.ensure_connection(self)
 
         streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS - self.DUPLICATE_RECORD_STREAMS
+        # Fail the test when the JIRA card is done to allow streams to be re-added and tested
+        self.assertNotEqual(base.JIRA_CLIENT.get_status_category('TDL-26951'),
+                            'done',
+                            msg='JIRA ticket has moved to done, re-add the NO_DATA_STREAMS defined to the testable streams')
         expected_replication_keys = self.expected_replication_keys()
         expected_replication_methods = self.expected_replication_method()
 

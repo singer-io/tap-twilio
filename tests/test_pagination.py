@@ -1,9 +1,9 @@
 from math import ceil
-from base import TwilioBaseTest
+import base
 from tap_tester import LOGGER, connections, runner
 
 
-class PaginationTest(TwilioBaseTest):
+class PaginationTest(base.TwilioBaseTest):
     def name(self):
         return "tap_twilio_pagination_test"
 
@@ -42,6 +42,10 @@ class PaginationTest(TwilioBaseTest):
 
                 stream_page_size = self.expected_page_limits()[stream]
                 if stream not in self.NO_DATA_STREAMS.union(self.NON_PAGINATION_STREAMS):
+                    # Fail the test when the JIRA card is done to allow streams to be re-added and tested
+                    self.assertNotEqual(base.JIRA_CLIENT.get_status_category('TDL-26951'),
+                                        'done',
+                                        msg='JIRA ticket has moved to done, re-add the NO_DATA_STREAMS defined to the testable streams')
                     self.assertLessEqual(stream_page_size, record_count)
 
                 # Verify there are no duplicates across pages

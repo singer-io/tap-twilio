@@ -1,8 +1,8 @@
-from base import TwilioBaseTest
+import base
 from tap_tester import LOGGER, connections, menagerie, runner
 
 
-class AllFieldsTest(TwilioBaseTest):
+class AllFieldsTest(base.TwilioBaseTest):
 
     # Skipping following fields since we are not able to generate test data
     MISSING_FIELDS = {
@@ -28,6 +28,10 @@ class AllFieldsTest(TwilioBaseTest):
         conn_id = connections.ensure_connection(self)
 
         streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS
+        # Fail the test when the JIRA card is done to allow streams to be re-added and tested
+        self.assertNotEqual(base.JIRA_CLIENT.get_status_category('TDL-26951'),
+                            'done',
+                            msg='JIRA ticket has moved to done, re-add the NO_DATA_STREAMS defined to the testable streams')
 
         # Run check mode
         found_catalogs = self.run_and_verify_check_mode(conn_id)

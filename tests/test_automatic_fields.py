@@ -1,11 +1,11 @@
 import json
 
-from base import TwilioBaseTest
+import base
 from tap_tester import LOGGER, connections, runner
 
 
 
-class AutomaticFieldsTest(TwilioBaseTest):
+class AutomaticFieldsTest(base.TwilioBaseTest):
     def name(self):
         return "tap_twilio_automatic_fields_test"
 
@@ -24,6 +24,10 @@ class AutomaticFieldsTest(TwilioBaseTest):
         conn_id = connections.ensure_connection(self)
 
         streams_to_test = self.expected_streams() - self.NO_DATA_STREAMS - self.DUPLICATE_RECORD_STREAMS
+        # Fail the test when the JIRA card is done to allow streams to be re-added and tested
+        self.assertNotEqual(base.JIRA_CLIENT.get_status_category('TDL-26951'),
+                            'done',
+                            msg='JIRA ticket has moved to done, re-add the NO_DATA_STREAMS defined to the testable streams')
 
         # run check mode
         found_catalogs = self.run_and_verify_check_mode(conn_id)
