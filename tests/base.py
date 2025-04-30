@@ -186,7 +186,7 @@ class TwilioBaseTest(unittest.TestCase):
             "messages": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.REPLICATION_KEYS: {"date_updated"},
+                self.REPLICATION_KEYS: {"date_sent"},
                 self.EXPECTED_PAGE_SIZE: 50,
                 self.OBEYS_START_DATE: True
             },
