@@ -134,7 +134,7 @@ def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_fie
     last_datetime = get_bookmark(state, stream_name, start_date)
     if stream_name == "messages":
         # The API supports querying only by date_sent, not date_updated.
-        # To retrieve updates from the past few days, use lookback_window is used.
+        # To retrieve updates for the past some days, lookback_window is used.
         last_datetime =  strftime(strptime_to_utc(last_datetime) - timedelta(days=lookback_window))
 
     max_bookmark_value = last_datetime
