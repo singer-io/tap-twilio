@@ -9,7 +9,7 @@ from tap_twilio.streams import STREAMS, flatten_streams
 from tap_twilio.transform import transform_json
 
 LOGGER = singer.get_logger()
-
+LOOKBACK_WINDOW = 15  # days
 
 def write_schema(catalog, stream_name):
     stream = catalog.get_stream(stream_name)
@@ -133,9 +133,9 @@ def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_fie
     # Get the latest bookmark for the stream and set the last_integer/datetime
     last_datetime = get_bookmark(state, stream_name, start_date)
     if stream_name == "messages":
-        # Set the last_datetime to lookback_window days before the last bookmark
-        # Consider 5 minutes of buffer time
-        last_datetime =  strftime(strptime_to_utc(last_datetime) - timedelta(days=lookback_window, minutes=5))
+        # The API supports querying only by date_sent, not date_updated.
+        # To retrieve updates from the past few days, use lookback_window is used.
+        last_datetime =  strftime(strptime_to_utc(last_datetime) - timedelta(days=lookback_window))
 
     max_bookmark_value = last_datetime
     LOGGER.info('stream: {}, bookmark_field: {}, last_datetime: {}'.format(
@@ -189,7 +189,7 @@ def sync_endpoint(
     bookmark_query_field_to = endpoint_config.get('bookmark_query_field_to')
     data_key = endpoint_config.get('data_key', 'data')
     id_fields = endpoint_config.get('key_properties')
-    lookback_window=int(config.get('lookback_window') or'15')
+    lookback_window=int(config.get('lookback_window') or LOOKBACK_WINDOW)
 
     start_window, end_window, date_window_days, now_datetime, last_datetime, max_bookmark_value = \
         get_dates(
