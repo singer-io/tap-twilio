@@ -9,7 +9,7 @@ from tap_twilio.streams import STREAMS, flatten_streams
 from tap_twilio.transform import transform_json
 
 LOGGER = singer.get_logger()
-
+LOOKBACK_WINDOW = 15  # days
 
 def write_schema(catalog, stream_name):
     stream = catalog.get_stream(stream_name)
@@ -116,7 +116,7 @@ def process_records(catalog,  # pylint: disable=too-many-branches
 
 
 def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_field_from,
-              bookmark_query_field_to, date_window_days):
+              bookmark_query_field_to, date_window_days, lookback_window):
     """
     Given the state, stream, endpoint config, and start date, determine the date window for syncing
     as well as the relevant dates and window day increments.
@@ -127,10 +127,16 @@ def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_fie
     :param bookmark_query_field_from: field, if applicable, for windowing the stream request
     :param bookmark_query_field_to: field, if applicable, for windowing the stream request
     :param date_window_days: number of days to perform endpoint call for at a time, defaults to 30
+    :param lookback_window: number of days before the last saved bookmark, defaults to 15
     :return:
     """
     # Get the latest bookmark for the stream and set the last_integer/datetime
     last_datetime = get_bookmark(state, stream_name, start_date)
+    if stream_name == "messages":
+        # The API supports querying only by date_sent, not date_updated.
+        # To retrieve updates for the past some days, lookback_window is used.
+        last_datetime =  strftime(strptime_to_utc(last_datetime) - timedelta(days=lookback_window))
+
     max_bookmark_value = last_datetime
     LOGGER.info('stream: {}, bookmark_field: {}, last_datetime: {}'.format(
         stream_name, bookmark_field, last_datetime))
@@ -183,6 +189,7 @@ def sync_endpoint(
     bookmark_query_field_to = endpoint_config.get('bookmark_query_field_to')
     data_key = endpoint_config.get('data_key', 'data')
     id_fields = endpoint_config.get('key_properties')
+    lookback_window=int(config.get('lookback_window') or LOOKBACK_WINDOW)
 
     start_window, end_window, date_window_days, now_datetime, last_datetime, max_bookmark_value = \
         get_dates(
@@ -192,7 +199,8 @@ def sync_endpoint(
             bookmark_field=bookmark_field,
             bookmark_query_field_from=bookmark_query_field_from,
             bookmark_query_field_to=bookmark_query_field_to,
-            date_window_days=date_window_days
+            date_window_days=date_window_days,
+            lookback_window=lookback_window
         )
 
     endpoint_total = 0

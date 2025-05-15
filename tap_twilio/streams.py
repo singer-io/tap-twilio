@@ -267,7 +267,7 @@ STREAMS = {
                 'data_key': 'messages',
                 'key_properties': ['sid'],
                 'replication_method': 'INCREMENTAL',  # Filter query
-                'replication_keys': ['date_updated'],
+                'replication_keys': ['date_sent'],
                 'bookmark_query_field_from': 'DateSent>',  # Daily
                 'bookmark_query_field_to': 'DateSent<',
                 'params': {},

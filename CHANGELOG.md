@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.0
+  * Implement lookback window for messages [#10](https://github.com/singer-io/tap-twilio/pull/10)
+
 ## 0.1.1
   * Fix Dependabot issue [#9](https://github.com/singer-io/tap-twilio/pull/9)
 

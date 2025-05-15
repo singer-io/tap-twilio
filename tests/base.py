@@ -35,7 +35,7 @@ class TwilioBaseTest(unittest.TestCase):
     # Skipping below streams beacuse they require a paid account to generate data
     NO_DATA_STREAMS = {"applications", "conference_participants", "dependent_phone_numbers", \
                    "transcriptions", "message_media", "messages", "alerts", \
-                   "calls", "incoming_phone_numbers"}
+                   "calls", "incoming_phone_numbers", "conferences"}
 
     # Fail the test when the JIRA card is done to allow streams to be re-added and tested
     jira_status = JIRA_CLIENT.get_status_category('TDL-26951')
@@ -186,7 +186,7 @@ class TwilioBaseTest(unittest.TestCase):
             "messages": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.REPLICATION_KEYS: {"date_updated"},
+                self.REPLICATION_KEYS: {"date_sent"},
                 self.EXPECTED_PAGE_SIZE: 50,
                 self.OBEYS_START_DATE: True
             },
