@@ -10,8 +10,8 @@ setup(name='tap-twilio',
       py_modules=['tap_twilio'],
       install_requires=[
           'backoff==1.8.0',
-          'requests==2.32.3',
-          'singer-python==5.13.0'
+          'requests==2.32.4',
+          'singer-python==5.13.2'
       ],
       entry_points='''
           [console_scripts]
