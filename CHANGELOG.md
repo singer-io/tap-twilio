@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1
+  * Bump dependency versions for twistlock compliance [#12](https://github.com/singer-io/tap-twilio/pull/12)
+
 ## 0.2.0
   * Implement lookback window for messages [#10](https://github.com/singer-io/tap-twilio/pull/10)
 
