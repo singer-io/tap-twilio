@@ -61,6 +61,7 @@ class DiscoveryTest(TwilioBaseTest):
                 expected_replication_keys = self.expected_replication_keys()[stream]
                 expected_automatic_fields = self.expected_automatic_fields()[stream]
                 expected_replication_method = self.expected_replication_method()[stream]
+                expected_parent_stream = self.expected_metadata()[stream].get(self.EXPECTED_PARENT_STREAM)
 
                 # collecting actual values
                 schema_and_metadata = menagerie.get_annotated_schema(conn_id, catalog["stream_id"])
@@ -75,6 +76,9 @@ class DiscoveryTest(TwilioBaseTest):
                 actual_replication_method = (
                     stream_properties[0].get("metadata", {self.REPLICATION_METHOD: None}).get(self.REPLICATION_METHOD)
                 )
+                stream_metadata = stream_properties[0].get("metadata", {})
+                actual_parent_stream = stream_metadata.get("parent-tap-stream-id")
+
                 actual_automatic_fields = {
                     item.get("breadcrumb", ["properties", None])[1]
                     for item in metadata
@@ -139,3 +143,16 @@ class DiscoveryTest(TwilioBaseTest):
                     ),
                     msg="Not all non key properties are set to available in metadata",
                 )
+
+                if expected_parent_stream:
+                    self.assertEqual(
+                        expected_parent_stream,
+                        actual_parent_stream,
+                        msg=f"Expected parent stream for {stream} is {expected_parent_stream} "
+                            f"but found {actual_parent_stream}",
+                    )
+                else:
+                    self.assertIsNone(
+                        actual_parent_stream,
+                        msg=f"{stream} should not have a parent stream but found {actual_parent_stream}",
+                    )

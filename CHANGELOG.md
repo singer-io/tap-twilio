@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0
+  * Added Parent Relationship to the child streams for metadata [#15](https://github.com/singer-io/tap-twilio/pull/15)
+
 ## 0.2.1
   * Bump dependency versions for twistlock compliance [#12](https://github.com/singer-io/tap-twilio/pull/12)
 
