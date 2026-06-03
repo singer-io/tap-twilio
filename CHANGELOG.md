@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.2
+  * Bump requests to 2.33.0 for security updates [#20](https://github.com/singer-io/tap-twilio/pull/20)
+
+
 ## 0.2.1
   * Bump dependency versions for twistlock compliance [#12](https://github.com/singer-io/tap-twilio/pull/12)
 
