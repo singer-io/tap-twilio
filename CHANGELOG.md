@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0
+  * Added stream-level access check during discovery; streams returning 401/403/404/405 are excluded from the catalog with a warning [#21](https://github.com/singer-io/tap-twilio/pull/21)
+
 # 0.2.2
   * Bump requests to 2.33.0 for security updates [#20](https://github.com/singer-io/tap-twilio/pull/20)
 
