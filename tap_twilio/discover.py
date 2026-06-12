@@ -3,7 +3,6 @@ from singer.catalog import Catalog, CatalogEntry, Schema
 from tap_twilio.schema import get_schemas
 from tap_twilio.streams import flatten_streams, STREAMS
 from tap_twilio.client import (
-    TwilioError,
     TwilioUnauthorizedError,
     TwilioForbiddenError,
     TwilioNotFoundError,
