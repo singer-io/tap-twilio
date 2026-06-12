@@ -28,12 +28,6 @@ def check_stream_access(client, stream_name, stream_config) -> bool:
     except (TwilioUnauthorizedError, TwilioForbiddenError,
             TwilioNotFoundError, TwilioMethodNotAllowedError):
         return False
-    except TwilioError:
-        LOGGER.warning(
-            "Stream '%s' probe returned a non-auth API error; assuming accessible.",
-            stream_name,
-        )
-        return True
 
 
 def discover(client) -> Catalog:
