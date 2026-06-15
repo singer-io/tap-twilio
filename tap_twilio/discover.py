@@ -29,46 +29,61 @@ def check_stream_access(client, stream_name, stream_config) -> bool:
         return False
 
 
-def discover(client) -> Catalog:
-    """Build the Singer catalog, probing each top-level stream to verify access.
-    Streams returning 401/403/404/405 are excluded. Child streams are excluded
-    when their top-level parent is inaccessible. Raises if no streams are accessible.
-    """
-    schemas, field_metadata = get_schemas()
-    catalog = Catalog([])
-
-    flat_streams = flatten_streams()
-
-    # Determine which top-level streams are accessible
-    accessible_top_level = set()
-    for stream_name, stream_config in STREAMS.items():
-        if check_stream_access(client, stream_name, stream_config):
-            accessible_top_level.add(stream_name)
-        else:
+def _prune_inaccessible_children(schemas: dict, field_metadata: dict, flat_streams: dict) -> None:
+    """Remove child streams from the catalog whose parent stream was excluded."""
+    for stream_name, stream_config in list(flat_streams.items()):
+        if stream_name not in schemas:
+            continue
+        grandparent = stream_config.get('grandparent_stream')
+        parent = stream_config.get('parent_stream')
+        top_level_parent = grandparent or parent
+        if top_level_parent and top_level_parent not in schemas:
             LOGGER.warning(
-                "Stream '%s' will be excluded from the catalog due to insufficient permissions.",
-                stream_name,
-            )
-
-    for stream_name, schema_dict in schemas.items():
-        flat = flat_streams.get(stream_name, {})
-
-        # Exclude child/grandchild streams whose top-level parent is inaccessible
-        grandparent = flat.get('grandparent_stream')
-        parent = flat.get('parent_stream')
-        top_level_parent = grandparent or parent  # grandparent takes precedence for grandchildren
-        if top_level_parent and top_level_parent not in accessible_top_level:
-            LOGGER.warning(
-                "Stream '%s' will be excluded from the catalog because its "
-                "top-level parent stream '%s' is not accessible.",
+                "Stream '%s' excluded from catalog because its parent stream '%s' is not accessible.",
                 stream_name,
                 top_level_parent,
             )
-            continue
+            schemas.pop(stream_name, None)
+            field_metadata.pop(stream_name, None)
 
-        # Exclude top-level streams that failed the probe
-        if stream_name in STREAMS and stream_name not in accessible_top_level:
-            continue
+
+def _apply_access_checks(client, schemas: dict, field_metadata: dict, flat_streams: dict) -> None:
+    """Remove inaccessible top-level streams and dependent child streams in place."""
+    inaccessible_streams = [
+        stream_name
+        for stream_name, stream_config in STREAMS.items()
+        if stream_name in schemas and not check_stream_access(client, stream_name, stream_config)
+    ]
+
+    for stream_name in inaccessible_streams:
+        schemas.pop(stream_name, None)
+        field_metadata.pop(stream_name, None)
+
+    _prune_inaccessible_children(schemas, field_metadata, flat_streams)
+
+    if inaccessible_streams:
+        if len(inaccessible_streams) == len(STREAMS):
+            raise TwilioForbiddenError(
+                "HTTP-error-code: 403, Error: The account credentials supplied do not have 'read' access to any "
+                "of the streams supported by the tap. Data collection cannot be initiated due to lack of permissions."
+            )
+        LOGGER.warning(
+            "The account credentials supplied do not have 'read' access to the following stream(s): %s. "
+            "These streams have been excluded from the catalog.",
+            ", ".join(inaccessible_streams),
+        )
+
+
+def discover(client) -> Catalog:
+    """Build the Singer catalog after excluding inaccessible streams."""
+    schemas, field_metadata = get_schemas()
+    flat_streams = flatten_streams()
+    _apply_access_checks(client, schemas, field_metadata, flat_streams)
+
+    catalog = Catalog([])
+
+    for stream_name, schema_dict in schemas.items():
+        flat = flat_streams.get(stream_name, {})
 
         schema = Schema.from_dict(schema_dict)
         mdata = field_metadata[stream_name]
@@ -80,12 +95,6 @@ def discover(client) -> Catalog:
             schema=schema,
             metadata=mdata
         ))
-
-    if not catalog.streams:
-        raise Exception(
-            "The credentials do not have read access to any of the supported streams. "
-            "Verify that the API credentials have the required permissions."
-        )
 
     return catalog
 

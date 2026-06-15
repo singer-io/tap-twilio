@@ -4,7 +4,6 @@ from singer.catalog import Catalog
 
 from tap_twilio.discover import discover, check_stream_access
 from tap_twilio.client import (
-    TwilioError,
     TwilioUnauthorizedError,
     TwilioForbiddenError,
     TwilioNotFoundError,
@@ -60,12 +59,12 @@ class TestCheckStreamAccess(unittest.TestCase):
         result = check_stream_access(client, 'accounts', self._stream_config)
         self.assertFalse(result)
 
-    def test_returns_true_on_non_auth_twilio_error(self):
-        """Non-auth API errors mean the server responded — stream assumed accessible."""
+    def test_raises_on_non_auth_twilio_error(self):
+        """Non-auth API errors (e.g. 400) are not caught and propagate to the caller."""
         client = self._client()
         client.request.side_effect = TwilioBadRequestError('400')
-        result = check_stream_access(client, 'accounts', self._stream_config)
-        self.assertTrue(result)
+        with self.assertRaises(TwilioBadRequestError):
+            check_stream_access(client, 'accounts', self._stream_config)
 
     def test_reraises_non_twilio_errors(self):
         client = self._client()
@@ -121,9 +120,9 @@ class TestDiscover(unittest.TestCase):
     @patch('tap_twilio.discover.check_stream_access')
     def test_all_inaccessible_raises_exception(self, mock_check):
         mock_check.return_value = False
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(TwilioForbiddenError) as ctx:
             discover(MagicMock())
-        self.assertIn('do not have read access', str(ctx.exception))
+        self.assertIn("do not have 'read' access to any", str(ctx.exception))
 
 
 if __name__ == '__main__':
