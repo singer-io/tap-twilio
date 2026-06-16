@@ -212,40 +212,48 @@ def sync_endpoint(
             ', Date window from: {} to {}'.format(start_window, end_window) \
                 if bookmark_query_field_from else ''))
 
-        params = static_params  # adds in endpoint specific, sort, filter params
+        date_window_total = 0
+        status_values = endpoint_config.get('status_values', [None])
 
-        if bookmark_query_field_from:
-            params[bookmark_query_field_from] = strftime(start_window)[:10]  # truncate date
-        if bookmark_query_field_to:
-            params[bookmark_query_field_to] = strftime(end_window)[:10]  # truncate date
+        for status_value in status_values:
+            params = static_params.copy()  # adds in endpoint specific, sort, filter params
 
-        # pagination: loop thru all pages of data using next (if not None)
-        page = 1
-        api_version = endpoint_config.get('api_version')
-        if api_version in path:
-            next_url = '{}{}'.format(endpoint_config.get('api_url'), path)
-        else:
-            next_url = '{}/{}/{}'.format(endpoint_config.get('api_url'), api_version, path)
+            if status_value:
+                params['Status'] = status_value
+                LOGGER.info('START Sync for Stream: {} with Status: {}'.format(stream_name, status_value))
 
-        offset = 0
-        limit = 500  # Default limit for Twilio API, unable to change this
-        total_records = 0
+            if bookmark_query_field_from:
+                params[bookmark_query_field_from] = strftime(start_window)[:10]  # truncate date
+            if bookmark_query_field_to:
+                params[bookmark_query_field_to] = strftime(end_window)[:10]  # truncate date
 
-        while next_url is not None:
-            # Need URL querystring for 1st page; subsequent pages provided by next_url
-            # querystring: Squash query params into string
-            querystring = None
-            if page == 1 and not params == {}:
-                querystring = '&'.join(['%s=%s' % (key, value) for (key, value) in params.items()])
-                # Replace <parent_id> in child stream params
-                if parent_id:
-                    querystring = querystring.replace('<parent_id>', parent_id)
+            # pagination: loop thru all pages of data using next (if not None)
+            page = 1
+            api_version = endpoint_config.get('api_version')
+            if api_version in path:
+                next_url = '{}{}'.format(endpoint_config.get('api_url'), path)
             else:
-                params = None
-            LOGGER.info('URL for Stream {}: {}{}'.format(
-                stream_name,
-                next_url,
-                '?{}'.format(querystring) if params else ''))
+                next_url = '{}/{}/{}'.format(endpoint_config.get('api_url'), api_version, path)
+
+            offset = 0
+            limit = 500  # Default limit for Twilio API, unable to change this
+            total_records = 0
+
+            while next_url is not None:
+                # Need URL querystring for 1st page; subsequent pages provided by next_url
+                # querystring: Squash query params into string
+                querystring = None
+                if page == 1 and not params == {}:
+                    querystring = '&'.join(['%s=%s' % (key, value) for (key, value) in params.items()])
+                    # Replace <parent_id> in child stream params
+                    if parent_id:
+                        querystring = querystring.replace('<parent_id>', parent_id)
+                else:
+                    params = None
+                LOGGER.info('URL for Stream {}: {}{}'.format(
+                    stream_name,
+                    next_url,
+                    '?{}'.format(querystring) if params else ''))
 
             # API request data
             data = client.get(
@@ -413,8 +421,13 @@ def sync_endpoint(
             page = page + 1
             # End page/batch - while next URL loop
 
+            # Add status_value loop's total to date window total
+            date_window_total = date_window_total + total_records
+            # End status_values loop
+
         # Update the state with the max_bookmark_value for the stream date window
         # Twilio API does not allow page/batch sorting; bookmark written for date window
+        # This happens after all status_values are fetched for this date window
         if bookmark_field:
             write_bookmark(state, stream_name, max_bookmark_value)
 
@@ -425,7 +438,7 @@ def sync_endpoint(
             end_window = now_datetime
         else:
             end_window = next_end_window
-        endpoint_total = endpoint_total + total_records
+        endpoint_total = endpoint_total + date_window_total
         # End date window
 
     # Return total_records (for all pages and date windows)

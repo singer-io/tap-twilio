@@ -187,6 +187,7 @@ STREAMS = {
                 'bookmark_query_field_from': 'DateUpdated>',  # Daily
                 'bookmark_query_field_to': 'DateUpdated<',
                 'params': {},
+                'status_values': ['init', 'in-progress', 'completed'],
                 'pagingation': 'root',
                 'children': {
                     # pylint: disable=line-too-long
