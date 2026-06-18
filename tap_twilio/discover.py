@@ -25,7 +25,12 @@ def check_stream_access(client, stream_name, stream_config) -> bool:
         client.request('GET', url=url, params={'PageSize': 1}, endpoint=stream_name)
         return True
     except (TwilioUnauthorizedError, TwilioForbiddenError,
-            TwilioNotFoundError, TwilioMethodNotAllowedError):
+            TwilioNotFoundError, TwilioMethodNotAllowedError) as err:
+        LOGGER.warning(
+            "Excluding unauthorized stream '%s' from catalog. HTTP-Error-Message: '%s'",
+            stream_name,
+            str(err),
+        )
         return False
 
 
@@ -62,10 +67,13 @@ def _apply_access_checks(client, schemas: dict, field_metadata: dict, flat_strea
     _prune_inaccessible_children(schemas, field_metadata, flat_streams)
 
     if inaccessible_streams:
-        if len(inaccessible_streams) == len(STREAMS):
+        accessible_top_level = sum(
+            1 for stream_name in STREAMS
+            if stream_name in schemas
+        )
+        if accessible_top_level == 0:
             raise TwilioForbiddenError(
-                "HTTP-error-code: 403, Error: The account credentials supplied do not have 'read' access to any "
-                "of the streams supported by the tap. Data collection cannot be initiated due to lack of permissions."
+                "HTTP 403: No read access to any supported streams."
             )
         LOGGER.warning(
             "The account credentials supplied do not have 'read' access to the following stream(s): %s. "
