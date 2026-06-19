@@ -122,7 +122,7 @@ class TestDiscover(unittest.TestCase):
         mock_check.return_value = False
         with self.assertRaises(TwilioForbiddenError) as ctx:
             discover(MagicMock())
-        self.assertIn("HTTP 403: No read access to any supported streams.", str(ctx.exception))
+        self.assertIn("HTTP-error-code: 403, Error: The credentials do not have 'read' access to any supported streams.", str(ctx.exception))
 
 
 if __name__ == '__main__':

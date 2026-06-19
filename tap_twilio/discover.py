@@ -66,18 +66,16 @@ def _apply_access_checks(client, schemas: dict, field_metadata: dict, flat_strea
 
     _prune_inaccessible_children(schemas, field_metadata, flat_streams)
 
-    if inaccessible_streams:
-        accessible_top_level = sum(
-            1 for stream_name in STREAMS
-            if stream_name in schemas
+    accessible_streams = [s for s in STREAMS if s in schemas]
+
+    if not accessible_streams:
+        raise TwilioForbiddenError(
+            "HTTP-error-code: 403, Error: The credentials do not have "
+            "'read' access to any supported streams."
         )
-        if accessible_top_level == 0:
-            raise TwilioForbiddenError(
-                "HTTP 403: No read access to any supported streams."
-            )
+    if inaccessible_streams:
         LOGGER.warning(
-            "The account credentials supplied do not have 'read' access to the following stream(s): %s. "
-            "These streams have been excluded from the catalog.",
+            "No 'read' access to stream(s): %s. Excluded from catalog.",
             ", ".join(inaccessible_streams),
         )
 
