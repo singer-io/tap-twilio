@@ -316,6 +316,12 @@ To set up authentication simply include your Twilio `account_sid` and `auth_toke
 
     ```
 
+    Run unit tests:
+    ```bash
+    > pip install nose2
+    > python -m nose2 -v -s tests/unittests
+    ```
+
     To [check the tap](https://github.com/singer-io/singer-tools#singer-check-tap) and verify working:
     ```bash
     > tap-twilio --config tap_config.json --catalog catalog.json | singer-check-tap > state.json
