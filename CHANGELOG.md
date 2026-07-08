@@ -1,6 +1,6 @@
 # Changelog
 
-# 0.2.3
+# 0.3.0
   * **CRITICAL**: Add Status parameter to conferences stream to fetch all statuses (init, in-progress, completed). 
     Twilio will default to in-progress only starting July 13, 2026. Without this fix, the tap will silently stop syncing completed and init conferences after that date.
   * Conferences stream now makes three sequential API calls (one per status value) within each date window. Results stream in real-time; bookmark only written after all three status calls complete.
