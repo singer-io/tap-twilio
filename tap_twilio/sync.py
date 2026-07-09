@@ -166,6 +166,22 @@ def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_fie
     return start_window, end_window, date_window_days, now_datetime, last_datetime, max_bookmark_value
 
 
+def _iter_status_params(endpoint_config, static_params):
+    """Yield (status_value, params) for each API call needed for this stream.
+
+    Streams with status_values defined (e.g. conferences) require one API call
+    per status; all other streams yield once with the original params unchanged.
+    """
+    status_values = endpoint_config.get('status_values')
+    if not status_values:
+        yield None, static_params.copy()
+        return
+    for status_value in status_values:
+        params = static_params.copy()
+        params['Status'] = status_value
+        yield status_value, params
+
+
 # Sync a specific parent or child endpoint.
 # pylint: disable=too-many-statements,too-many-branches
 def sync_endpoint(
@@ -212,206 +228,209 @@ def sync_endpoint(
             ', Date window from: {} to {}'.format(start_window, end_window) \
                 if bookmark_query_field_from else ''))
 
-        params = static_params  # adds in endpoint specific, sort, filter params
+        date_window_total = 0
+        for status_value, params in _iter_status_params(endpoint_config, static_params):
 
-        if bookmark_query_field_from:
-            params[bookmark_query_field_from] = strftime(start_window)[:10]  # truncate date
-        if bookmark_query_field_to:
-            params[bookmark_query_field_to] = strftime(end_window)[:10]  # truncate date
+            if bookmark_query_field_from:
+                params[bookmark_query_field_from] = strftime(start_window)[:10]  # truncate date
+            if bookmark_query_field_to:
+                params[bookmark_query_field_to] = strftime(end_window)[:10]  # truncate date
 
-        # pagination: loop thru all pages of data using next (if not None)
-        page = 1
-        api_version = endpoint_config.get('api_version')
-        if api_version in path:
-            next_url = '{}{}'.format(endpoint_config.get('api_url'), path)
-        else:
-            next_url = '{}/{}/{}'.format(endpoint_config.get('api_url'), api_version, path)
-
-        offset = 0
-        limit = 500  # Default limit for Twilio API, unable to change this
-        total_records = 0
-
-        while next_url is not None:
-            # Need URL querystring for 1st page; subsequent pages provided by next_url
-            # querystring: Squash query params into string
-            querystring = None
-            if page == 1 and not params == {}:
-                querystring = '&'.join(['%s=%s' % (key, value) for (key, value) in params.items()])
-                # Replace <parent_id> in child stream params
-                if parent_id:
-                    querystring = querystring.replace('<parent_id>', parent_id)
+            # pagination: loop thru all pages of data using next (if not None)
+            page = 1
+            api_version = endpoint_config.get('api_version')
+            if api_version in path:
+                next_url = '{}{}'.format(endpoint_config.get('api_url'), path)
             else:
-                params = None
-            LOGGER.info('URL for Stream {}: {}{}'.format(
-                stream_name,
-                next_url,
-                '?{}'.format(querystring) if params else ''))
+                next_url = '{}/{}/{}'.format(endpoint_config.get('api_url'), api_version, path)
 
-            # API request data
-            data = client.get(
-                url=next_url,
-                path=path,
-                params=querystring,
-                endpoint=stream_name)
+            offset = 0
+            limit = 500  # Default limit for Twilio API, unable to change this
+            total_records = 0
 
-            # time_extracted: datetime when the data was extracted from the API
-            time_extracted = utils.now()
-            if not data or data is None or data == {}:
-                total_records = 0
-                break  # No data results
+            while next_url is not None:
+                # Need URL querystring for 1st page; subsequent pages provided by next_url
+                # querystring: Squash query params into string
+                querystring = None
+                if page == 1 and not params == {}:
+                    querystring = '&'.join(['%s=%s' % (key, value) for (key, value) in params.items()])
+                    # Replace <parent_id> in child stream params
+                    if parent_id:
+                        querystring = querystring.replace('<parent_id>', parent_id)
+                else:
+                    params = None
+                LOGGER.info('URL for Stream {}: {}{}'.format(
+                    stream_name,
+                    next_url,
+                    '?{}'.format(querystring) if params else ''))
 
-            # Get pagination details
-            # Next page url key in API response is different for alerts and remaining streams
-            next_url_key_in_api_response = endpoint_config.get('pagination_key', 'next_page_uri')
-            if data.get(next_url_key_in_api_response):
-                next_url = endpoint_config.get("api_url") + data[next_url_key_in_api_response]
-            else:
-                next_url = None
+                # API request data
+                data = client.get(
+                    url=next_url,
+                    path=path,
+                    params=querystring,
+                    endpoint=stream_name)
 
-            api_total = len(data.get(endpoint_config.get("data_key"), []))
-            if not data or data is None:
-                total_records = 0
-                break  # No data results
+                # time_extracted: datetime when the data was extracted from the API
+                time_extracted = utils.now()
+                if not data or data is None or data == {}:
+                    total_records = 0
+                    break  # No data results
 
-            # Transform data with transform_json from transform.py
-            # The data_key identifies the array/list of records below the <root> element
-            transformed_data = []  # initialize the record list
-            data_list = []
-            data_dict = {}
-            if data_key in data:
-                if isinstance(data[data_key], list):
-                    transformed_data = transform_json(data, data_key)
-                elif isinstance(data[data_key], dict):
-                    data_list.append(data[data_key])
-                    data_dict[data_key] = data_list
-                    transformed_data = transform_json(data_dict, data_key)
-            else:  # data_key not in data
-                if isinstance(data, list):
-                    data_list = data
-                    data_dict[data_key] = data_list
-                    transformed_data = transform_json(data_dict, data_key)
-                elif isinstance(data, dict):
-                    data_list.append(data)
-                    data_dict[data_key] = data_list
-                    transformed_data = transform_json(data_dict, data_key)
+                # Get pagination details
+                # Next page url key in API response is different for alerts and remaining streams
+                next_url_key_in_api_response = endpoint_config.get('pagination_key', 'next_page_uri')
+                if data.get(next_url_key_in_api_response):
+                    next_url = endpoint_config.get("api_url") + data[next_url_key_in_api_response]
+                else:
+                    next_url = None
 
-            # Process records and get the max_bookmark_value and record_count for the set of records
-            if stream_name in selected_streams:
-                max_bookmark_value, record_count = process_records(
-                    catalog=catalog,
-                    stream_name=stream_name,
-                    records=transformed_data,
-                    time_extracted=time_extracted,
-                    bookmark_field=bookmark_field,
-                    max_bookmark_value=max_bookmark_value,
-                    last_datetime=last_datetime,
-                    parent=parent,
-                    parent_id=parent_id)
-                LOGGER.info('Stream {}, batch processed {} records'.format(
-                    stream_name, record_count))
-            else:
-                record_count = 0
+                api_total = len(data.get(endpoint_config.get("data_key"), []))
+                if not data or data is None:
+                    total_records = 0
+                    break  # No data results
 
-            # Loop thru parent batch records for each children objects (if should stream)
-            children = endpoint_config.get('children')
-            if children:
-                for child_stream_name, child_endpoint_config in children.items():
-                    # Following check will make sure tap extracts the data for all the child streams
-                    # even if the parent isn't selected
-                    if child_stream_name in selected_streams or child_stream_name in required_streams:
-                        LOGGER.info('START Syncing: {}'.format(child_stream_name))
-                        write_schema(catalog, child_stream_name)
-                        parent_id_field = None
-                        # For each parent record
-                        for record in transformed_data:
-                            i = 0
-                            # Set parent_id
-                            for id_field in id_fields:
-                                if i == 0:
-                                    parent_id_field = id_field
-                                if id_field == 'id':
-                                    parent_id_field = id_field
-                                i = i + 1
-                            parent_id = record.get(parent_id_field)
+                # Transform data with transform_json from transform.py
+                # The data_key identifies the array/list of records below the <root> element
+                transformed_data = []  # initialize the record list
+                data_list = []
+                data_dict = {}
+                if data_key in data:
+                    if isinstance(data[data_key], list):
+                        transformed_data = transform_json(data, data_key)
+                    elif isinstance(data[data_key], dict):
+                        data_list.append(data[data_key])
+                        data_dict[data_key] = data_list
+                        transformed_data = transform_json(data_dict, data_key)
+                else:  # data_key not in data
+                    if isinstance(data, list):
+                        data_list = data
+                        data_dict[data_key] = data_list
+                        transformed_data = transform_json(data_dict, data_key)
+                    elif isinstance(data, dict):
+                        data_list.append(data)
+                        data_dict[data_key] = data_list
+                        transformed_data = transform_json(data_dict, data_key)
 
-                            # sync_endpoint for child
-                            LOGGER.info(
-                                'START Sync for Stream: {}, parent_stream: {}, parent_id: {}'
-                                .format(child_stream_name, stream_name, parent_id))
+                # Process records and get the max_bookmark_value and record_count for the set of records
+                if stream_name in selected_streams:
+                    max_bookmark_value, record_count = process_records(
+                        catalog=catalog,
+                        stream_name=stream_name,
+                        records=transformed_data,
+                        time_extracted=time_extracted,
+                        bookmark_field=bookmark_field,
+                        max_bookmark_value=max_bookmark_value,
+                        last_datetime=last_datetime,
+                        parent=parent,
+                        parent_id=parent_id)
+                    LOGGER.info('Stream {}, batch processed {} records'.format(
+                        stream_name, record_count))
+                else:
+                    record_count = 0
 
-                            # If the results of the stream being synced has child streams,
-                            # their endpoints will be in the results,
-                            # this will grab the child path for the child stream we're syncing,
-                            # if we're syncing it. If it doesn't exist we just skip it below.
-                            child_path = None
-                            if child_stream_name in ("usage_records", "usage_triggers"):
-                                if 'usage' in record.get('_subresource_uris', {}):
-                                    child_path = child_endpoint_config.get('path').format(
-                                        ParentId=parent_id)
-                            elif child_stream_name == 'dependent_phone_numbers':
-                                child_path = child_endpoint_config.get('path').format(
-                                    ParentId=parent_id, AccountSid=record.get('account_sid'))
-                            else:
-                                child_path = record.get('_subresource_uris', {}).get(
-                                    child_endpoint_config.get('sub_resource_key',
-                                                              child_stream_name))
-                            child_bookmark_field = next(iter(child_endpoint_config.get(
-                                'replication_keys', [])), None)
+                # Loop thru parent batch records for each children objects (if should stream)
+                children = endpoint_config.get('children')
+                if children:
+                    for child_stream_name, child_endpoint_config in children.items():
+                        # Following check will make sure tap extracts the data for all the child streams
+                        # even if the parent isn't selected
+                        if child_stream_name in selected_streams or child_stream_name in required_streams:
+                            LOGGER.info('START Syncing: {}'.format(child_stream_name))
+                            write_schema(catalog, child_stream_name)
+                            parent_id_field = None
+                            # For each parent record
+                            for record in transformed_data:
+                                i = 0
+                                # Set parent_id
+                                for id_field in id_fields:
+                                    if i == 0:
+                                        parent_id_field = id_field
+                                    if id_field == 'id':
+                                        parent_id_field = id_field
+                                    i = i + 1
+                                parent_id = record.get(parent_id_field)
 
-                            if child_path:
-                                child_total_records = sync_endpoint(
-                                    client=client,
-                                    config=config,
-                                    catalog=catalog,
-                                    state=state,
-                                    start_date=start_date,
-                                    stream_name=child_stream_name,
-                                    path=child_path,
-                                    endpoint_config=child_endpoint_config,
-                                    bookmark_field=child_bookmark_field,
-                                    selected_streams=selected_streams,
-                                    # The child endpoint may be an endpoint that needs to window
-                                    # so we'll re-pull from the config here (or pass in the default)
-                                    date_window_days=int(config.get('date_window_days') or'30'),
-                                    parent=child_endpoint_config.get('parent'),
-                                    parent_id=parent_id,
-                                    account_sid=account_sid,
-                                    required_streams=required_streams)
-                            else:
+                                # sync_endpoint for child
                                 LOGGER.info(
-                                    'No child stream {} for parent stream {} in subresource uris'
-                                    .format(child_stream_name, stream_name))
-                                child_total_records = 0
-                            LOGGER.info(
-                                'FINISHED Sync for Stream: {}, parent_id: {}, total_records: {}' \
-                                    .format(child_stream_name, parent_id, child_total_records))
-                            # End transformed data record loop
-                        # End if child in selected streams
-                    # End child streams for parent
-                # End if children
+                                    'START Sync for Stream: {}, parent_stream: {}, parent_id: {}'
+                                    .format(child_stream_name, stream_name, parent_id))
 
-            # Parent record batch
-            # Adjust total_records w/ record_count, if needed
-            if record_count > total_records:
-                total_records = total_records + record_count
-            else:
-                total_records = api_total
+                                # If the results of the stream being synced has child streams,
+                                # their endpoints will be in the results,
+                                # this will grab the child path for the child stream we're syncing,
+                                # if we're syncing it. If it doesn't exist we just skip it below.
+                                child_path = None
+                                if child_stream_name in ("usage_records", "usage_triggers"):
+                                    if 'usage' in record.get('_subresource_uris', {}):
+                                        child_path = child_endpoint_config.get('path').format(
+                                            ParentId=parent_id)
+                                elif child_stream_name == 'dependent_phone_numbers':
+                                    child_path = child_endpoint_config.get('path').format(
+                                        ParentId=parent_id, AccountSid=record.get('account_sid'))
+                                else:
+                                    child_path = record.get('_subresource_uris', {}).get(
+                                        child_endpoint_config.get('sub_resource_key',
+                                                                  child_stream_name))
+                                child_bookmark_field = next(iter(child_endpoint_config.get(
+                                    'replication_keys', [])), None)
 
-            # to_rec: to record; ending record for the batch page
-            to_rec = offset + limit
-            if to_rec > total_records:
-                to_rec = total_records
+                                if child_path:
+                                    child_total_records = sync_endpoint(
+                                        client=client,
+                                        config=config,
+                                        catalog=catalog,
+                                        state=state,
+                                        start_date=start_date,
+                                        stream_name=child_stream_name,
+                                        path=child_path,
+                                        endpoint_config=child_endpoint_config,
+                                        bookmark_field=child_bookmark_field,
+                                        selected_streams=selected_streams,
+                                        # The child endpoint may be an endpoint that needs to window
+                                        # so we'll re-pull from the config here (or pass in the default)
+                                        date_window_days=int(config.get('date_window_days') or'30'),
+                                        parent=child_endpoint_config.get('parent'),
+                                        parent_id=parent_id,
+                                        account_sid=account_sid,
+                                        required_streams=required_streams)
+                                else:
+                                    LOGGER.info(
+                                        'No child stream {} for parent stream {} in subresource uris'
+                                        .format(child_stream_name, stream_name))
+                                    child_total_records = 0
+                                LOGGER.info(
+                                    'FINISHED Sync for Stream: {}, parent_id: {}, total_records: {}' \
+                                        .format(child_stream_name, parent_id, child_total_records))
+                                # End transformed data record loop
+                            # End if child in selected streams
+                        # End child streams for parent
+                    # End if children
 
-            LOGGER.info('Synced Stream: {}, page: {}, {} to {} of total records: {}'.format(
-                stream_name,
-                page,
-                offset,
-                to_rec,
-                total_records))
-            # Pagination: increment the offset by the limit (batch-size) and page
-            offset = offset + limit
-            page = page + 1
-            # End page/batch - while next URL loop
+                # Parent record batch
+                # Adjust total_records w/ record_count, if needed
+                if record_count > total_records:
+                    total_records = total_records + record_count
+                else:
+                    total_records = api_total
+
+                # to_rec: to record; ending record for the batch page
+                to_rec = offset + limit
+                if to_rec > total_records:
+                    to_rec = total_records
+
+                LOGGER.info('Synced Stream: {}, page: {}, {} to {} of total records: {}'.format(
+                    stream_name,
+                    page,
+                    offset,
+                    to_rec,
+                    total_records))
+                # Pagination: increment the offset by the limit (batch-size) and page
+                offset = offset + limit
+                page = page + 1
+                # End page/batch - while next URL loop
+
+            date_window_total = date_window_total + total_records
 
         # Update the state with the max_bookmark_value for the stream date window
         # Twilio API does not allow page/batch sorting; bookmark written for date window
@@ -425,7 +444,7 @@ def sync_endpoint(
             end_window = now_datetime
         else:
             end_window = next_end_window
-        endpoint_total = endpoint_total + total_records
+        endpoint_total = endpoint_total + date_window_total
         # End date window
 
     # Return total_records (for all pages and date windows)
