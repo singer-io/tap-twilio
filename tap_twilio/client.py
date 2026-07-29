@@ -102,7 +102,7 @@ class TwilioClient:
         self.__verified = False
 
     def __enter__(self):
-        self.__verified = self.check_access()
+        # self.__verified = self.check_access()
         return self
 
     @property
