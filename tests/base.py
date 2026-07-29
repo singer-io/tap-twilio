@@ -154,9 +154,10 @@ class TwilioBaseTest(unittest.TestCase):
             },
             "conference_participants": {
                 self.PRIMARY_KEYS: {"uri"},
-                self.REPLICATION_METHOD: self.FULL_TABLE,
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
+                self.OBEYS_START_DATE: True,
                 self.EXPECTED_PARENT_STREAM: "conferences"
             },
             "conferences": {
@@ -169,9 +170,10 @@ class TwilioBaseTest(unittest.TestCase):
             },
             "dependent_phone_numbers": {
                 self.PRIMARY_KEYS: {"sid"},
-                self.REPLICATION_METHOD: self.FULL_TABLE,
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
+                self.OBEYS_START_DATE: True,
                 self.EXPECTED_PARENT_STREAM: "addresses"
             },
             "incoming_phone_numbers": {
@@ -192,9 +194,10 @@ class TwilioBaseTest(unittest.TestCase):
             },
             "message_media": {
                 self.PRIMARY_KEYS: {"sid"},
-                self.REPLICATION_METHOD: self.FULL_TABLE,
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False,
+                self.OBEYS_START_DATE: True,
                 self.EXPECTED_PARENT_STREAM: "messages"
             },
             "messages": {
