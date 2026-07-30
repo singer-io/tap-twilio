@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.3.0
+  * **CRITICAL**: Add Status parameter to conferences stream to fetch all statuses (init, in-progress, completed). 
+    Twilio will default to in-progress only starting July 13, 2026. Without this fix, the tap will silently stop syncing completed and init conferences after that date.
+  * Conferences stream now makes three sequential API calls (one per status value) within each date window. Results stream in real-time; bookmark only written after all three status calls complete.
+  * Bump dependencies: backoff 1.10.0 -> 2.2.1, requests 2.33.0 -> 2.34.2, singer-python 5.13.2 -> 6.8.0.
+
 # 0.2.2
   * Bump requests to 2.33.0 for security updates [#20](https://github.com/singer-io/tap-twilio/pull/20)
 

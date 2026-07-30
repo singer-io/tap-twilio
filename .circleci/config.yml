@@ -18,6 +18,12 @@ jobs:
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
             pip install pylint
             pylint tap_twilio -d C,R,W
+      - run:
+          name: 'Unit Tests'
+          command: |
+            source /usr/local/share/virtualenvs/tap-twilio/bin/activate
+            uv pip install nose2
+            python -m nose2 -v -s tests/unittests
       - add_ssh_keys
       - run:
           name: 'JSON Validator'
