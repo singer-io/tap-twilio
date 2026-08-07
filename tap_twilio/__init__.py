@@ -44,5 +44,5 @@ def main():
                  catalog=parsed_args.catalog,
                  state=state)
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     main()

@@ -3,6 +3,8 @@ from singer.catalog import Catalog, CatalogEntry, Schema
 from tap_twilio.schema import get_schemas
 from tap_twilio.streams import flatten_streams, STREAMS
 from tap_twilio.client import (
+    API_URL,
+    API_VERSION,
     TwilioUnauthorizedError,
     TwilioForbiddenError,
 )
@@ -15,8 +17,8 @@ def check_stream_access(client, stream_name, stream_config, parent_id=None) -> b
     Returns False on 401/403; True on success or any other API error.
     If parent_id is supplied, {ParentId} in the path is replaced before probing.
     """
-    api_url = stream_config.get('api_url', 'https://api.twilio.com')
-    api_version = stream_config.get('api_version', '2010-04-01')
+    api_url = stream_config.get('api_url', API_URL)
+    api_version = stream_config.get('api_version', API_VERSION)
     path = stream_config['path']
     if parent_id:
         path = path.replace('{ParentId}', parent_id)
@@ -26,7 +28,7 @@ def check_stream_access(client, stream_name, stream_config, parent_id=None) -> b
         return True
     except (TwilioUnauthorizedError, TwilioForbiddenError) as err:
         LOGGER.warning(
-            "Excluding unauthorized stream '%s' from catalog. HTTP-Error-Message: '%s'",
+            "Unauthorized Stream: %s, excluding from catalog. HTTP-Error-Message: '%s'",
             stream_name,
             str(err),
         )
@@ -107,7 +109,7 @@ def _apply_access_checks(client, schemas: dict, field_metadata: dict, flat_strea
     all_excluded = inaccessible_streams + inaccessible_children + pruned_children
     if all_excluded:
         LOGGER.warning(
-            "No 'read' access to stream(s): %s. Excluded from catalog.",
+            "Unauthorized streams excluded from catalog: %s",
             ", ".join(all_excluded),
         )
 
@@ -126,17 +128,12 @@ def discover(client) -> Catalog:
         schema = Schema.from_dict(schema_dict)
         mdata = field_metadata[stream_name]
 
-        replication_keys = flat.get('replication_keys')
-        replication_key = replication_keys[0] if replication_keys else None
-
         catalog.streams.append(CatalogEntry(
             stream=stream_name,
             tap_stream_id=stream_name,
             key_properties=flat.get('key_properties'),
             schema=schema,
             metadata=mdata,
-            replication_key=replication_key,
-            replication_method=flat.get('replication_method'),
         ))
 
     return catalog

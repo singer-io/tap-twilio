@@ -162,6 +162,84 @@ class TestProcessRecordsFullTable(unittest.TestCase):
         self.assertEqual(count, 0)
         mock_write_record.assert_not_called()
 
+    @patch('tap_twilio.sync.write_record')
+    def test_parent_id_is_projected_for_child_records(self, mock_write_record):
+        catalog = _make_catalog(
+            'dependent_phone_numbers',
+            schema={
+                'type': 'object',
+                'properties': {
+                    'sid': {'type': 'string'},
+                    'address_id': {'type': 'string'},
+                },
+            },
+        )
+        records = [{'sid': 'PN1'}]
+        time_extracted = singer.utils.now()
+
+        process_records(
+            catalog=catalog,
+            stream_name='dependent_phone_numbers',
+            records=records,
+            time_extracted=time_extracted,
+            bookmark_field=None,
+            max_bookmark_value=None,
+            last_datetime=None,
+            parent='address',
+            parent_id='AD123',
+        )
+
+        written_record = mock_write_record.call_args[0][1]
+        self.assertEqual('AD123', written_record.get('address_id'))
+
+    @patch('tap_twilio.sync.write_record')
+    def test_parent_account_id_is_mapped_to_account_sid(self, mock_write_record):
+        catalog = _make_catalog(
+            'account_balance',
+            schema={
+                'type': 'object',
+                'properties': {
+                    'sid': {'type': 'string'},
+                    'account_sid': {'type': 'string'},
+                },
+            },
+        )
+        records = [{'sid': 'BA1'}]
+        time_extracted = singer.utils.now()
+
+        process_records(
+            catalog=catalog,
+            stream_name='account_balance',
+            records=records,
+            time_extracted=time_extracted,
+            bookmark_field=None,
+            max_bookmark_value=None,
+            last_datetime=None,
+            parent='accounts',
+            parent_id='AC123',
+        )
+
+        written_record = mock_write_record.call_args[0][1]
+        self.assertEqual('AC123', written_record.get('account_sid'))
+
+    @patch('tap_twilio.sync.Transformer')
+    def test_transformer_exception_is_reraised(self, mock_transformer_cls):
+        catalog = _make_catalog('calls')
+        transformer = MagicMock()
+        transformer.transform.side_effect = RuntimeError('boom')
+        mock_transformer_cls.return_value.__enter__.return_value = transformer
+
+        with self.assertRaises(RuntimeError):
+            process_records(
+                catalog=catalog,
+                stream_name='calls',
+                records=[{'sid': 'CA1'}],
+                time_extracted=singer.utils.now(),
+                bookmark_field=None,
+                max_bookmark_value=None,
+                last_datetime=None,
+            )
+
 
 # ---------------------------------------------------------------------------
 # update_currently_syncing
@@ -254,6 +332,78 @@ class TestSync(unittest.TestCase):
         # After sync completes, currently_syncing should be cleared (None or absent)
         currently_syncing = state.get('currently_syncing', None)
         self.assertIsNone(currently_syncing)
+
+    @patch('tap_twilio.sync.sync_endpoint', return_value=1)
+    @patch('tap_twilio.sync.write_schema')
+    @patch('tap_twilio.sync.update_currently_syncing')
+    @patch('tap_twilio.sync.flatten_streams')
+    @patch('tap_twilio.sync.STREAMS', {'messages': {'path': 'Messages', 'replication_keys': ['date_updated']}})
+    def test_sync_adds_parent_for_selected_child_stream(
+            self, mock_flatten, mock_update, mock_write_schema, mock_sync_endpoint):
+        from tap_twilio.sync import sync
+
+        mock_flatten.return_value = {
+            'messages': {'parent_stream': None},
+            'message_media': {'parent_stream': 'messages'},
+        }
+
+        child_entry = CatalogEntry(
+            stream='message_media',
+            tap_stream_id='message_media',
+            key_properties=['sid'],
+            schema=Schema.from_dict({'type': 'object', 'properties': {'sid': {'type': 'string'}}}),
+            metadata=[{'breadcrumb': [], 'metadata': {'selected': True}}],
+        )
+        catalog = Catalog([child_entry])
+
+        sync(
+            client=MagicMock(),
+            config={'start_date': '2022-01-01T00:00:00Z'},
+            catalog=catalog,
+            state={},
+        )
+
+        mock_write_schema.assert_called_once_with(catalog, 'messages')
+        mock_sync_endpoint.assert_called_once()
+
+    @patch('tap_twilio.sync.sync_endpoint', return_value=1)
+    @patch('tap_twilio.sync.write_schema')
+    @patch('tap_twilio.sync.update_currently_syncing')
+    @patch('tap_twilio.sync.flatten_streams')
+    @patch('tap_twilio.sync.STREAMS', {'message_media': {'path': 'Messages/{ParentId}/Media', 'replication_keys': ['date_updated']}})
+    def test_sync_handles_selected_child_when_parent_also_selected(
+            self, mock_flatten, mock_update, mock_write_schema, mock_sync_endpoint):
+        from tap_twilio.sync import sync
+
+        mock_flatten.return_value = {
+            'message_media': {'parent_stream': 'messages'},
+        }
+
+        parent_entry = CatalogEntry(
+            stream='messages',
+            tap_stream_id='messages',
+            key_properties=['sid'],
+            schema=Schema.from_dict({'type': 'object', 'properties': {'sid': {'type': 'string'}}}),
+            metadata=[{'breadcrumb': [], 'metadata': {'selected': True}}],
+        )
+        child_entry = CatalogEntry(
+            stream='message_media',
+            tap_stream_id='message_media',
+            key_properties=['sid'],
+            schema=Schema.from_dict({'type': 'object', 'properties': {'sid': {'type': 'string'}}}),
+            metadata=[{'breadcrumb': [], 'metadata': {'selected': True}}],
+        )
+        catalog = Catalog([parent_entry, child_entry])
+
+        sync(
+            client=MagicMock(),
+            config={'start_date': '2022-01-01T00:00:00Z'},
+            catalog=catalog,
+            state={},
+        )
+
+        mock_write_schema.assert_called_once_with(catalog, 'message_media')
+        mock_sync_endpoint.assert_called_once()
 
 
 if __name__ == '__main__':

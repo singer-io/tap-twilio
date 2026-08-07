@@ -55,6 +55,25 @@ class TestSyncUtils(unittest.TestCase):
         self.assertLessEqual(start_window, end_window)
 
     @mock.patch("tap_twilio.sync.utils.now")
+    def test_get_dates_caps_end_window_to_now(self, mock_now):
+        now = datetime(2022, 1, 10, tzinfo=timezone.utc)
+        mock_now.return_value = now
+        state = {"bookmarks": {"calls": "2022-01-09T00:00:00Z"}}
+
+        _start_window, end_window, _window_days, _now_dt, _last_dt, _max_bm = sync_module.get_dates(
+            state=state,
+            stream_name="calls",
+            start_date="2021-01-01T00:00:00Z",
+            bookmark_field="date_updated",
+            bookmark_query_field_from="DateSent>",
+            bookmark_query_field_to="DateSent<",
+            date_window_days=5,
+            lookback_window=15,
+        )
+
+        self.assertEqual(end_window, now)
+
+    @mock.patch("tap_twilio.sync.utils.now")
     def test_get_dates_messages_applies_lookback(self, mock_now):
         mock_now.return_value = datetime(2022, 1, 10, tzinfo=timezone.utc)
         state = {"bookmarks": {"messages": "2022-01-08T00:00:00Z"}}

@@ -58,10 +58,27 @@ class TestClientHelpers(unittest.TestCase):
         with self.assertRaises(TwilioError):
             raise_for_error(response)
 
+    def test_raise_for_error_raises_twilio_error_when_message_key_missing(self):
+        response = mock.MagicMock()
+        response.status_code = 400
+        response.text = "bad"
+        response.reason = "Bad Request"
+        response.content = b"{\"status\":400}"
+        response.raise_for_status.side_effect = requests.HTTPError("http")
+        response.json.return_value = {"status": 400, "code": 21201}
+
+        with self.assertRaises(TwilioError):
+            raise_for_error(response)
+
 
 class TestTwilioClient(unittest.TestCase):
     def test_check_access_raises_when_credentials_missing(self):
         client = TwilioClient(None, None)
+        with self.assertRaises(Exception):
+            TwilioClient.check_access.__wrapped__(client)
+
+    def test_check_access_raises_when_account_sid_missing(self):
+        client = TwilioClient(None, "token")
         with self.assertRaises(Exception):
             TwilioClient.check_access.__wrapped__(client)
 
@@ -74,6 +91,30 @@ class TestTwilioClient(unittest.TestCase):
 
         self.assertTrue(result)
         client._TwilioClient__session.get.assert_called_once()
+
+    def test_context_manager_enter_and_exit(self):
+        client = TwilioClient("AC123", "token")
+        client.check_access = mock.MagicMock(return_value=True)
+        client._TwilioClient__session.close = mock.MagicMock()
+
+        with client as active:
+            self.assertIs(active, client)
+            self.assertEqual("AC123", active.account_sid)
+
+        client.check_access.assert_called_once()
+        client._TwilioClient__session.close.assert_called_once()
+
+    @mock.patch("tap_twilio.client.raise_for_error")
+    def test_check_access_non_200_logs_and_raises(self, mock_raise_for_error):
+        client = TwilioClient("AC123", "token")
+        bad_response = mock.MagicMock(status_code=401)
+        client._TwilioClient__session.get = mock.MagicMock(return_value=bad_response)
+        mock_raise_for_error.side_effect = TwilioError("bad creds")
+
+        with self.assertRaises(TwilioError):
+            TwilioClient.check_access.__wrapped__(client)
+
+        mock_raise_for_error.assert_called_once_with(bad_response)
 
     def test_request_raises_server5xx(self):
         client = TwilioClient("AC123", "token")
@@ -136,3 +177,13 @@ class TestTwilioClient(unittest.TestCase):
         client.check_access.assert_called_once()
         request_kwargs = client._TwilioClient__session.request.call_args.kwargs
         self.assertTrue(request_kwargs["url"].endswith("/Accounts.json"))
+
+    def test_get_and_post_delegate_to_request(self):
+        client = TwilioClient("AC123", "token")
+        client.request = mock.MagicMock(return_value={"ok": True})
+
+        self.assertEqual({"ok": True}, client.get("Accounts"))
+        self.assertEqual({"ok": True}, client.post("Accounts"))
+
+        client.request.assert_any_call("GET", path="Accounts")
+        client.request.assert_any_call("POST", path="Accounts")

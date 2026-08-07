@@ -56,7 +56,7 @@ STREAMS = {
                         'path': 'Accounts/{AccountSid}/Addresses/{ParentId}/DependentPhoneNumbers.json',
                         'data_key': 'dependent_phone_numbers',
                         'key_properties': ['sid'],
-                        'replication_method': 'INCREMENTAL',  # ALL for parent Address
+                        'replication_method': 'INCREMENTAL',  # ALL for parent Message
                         'replication_keys': ['date_updated'],
                         'params': {},
                         'pagingation': 'root',

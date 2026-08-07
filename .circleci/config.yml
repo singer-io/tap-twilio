@@ -30,12 +30,12 @@ jobs:
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
             uv pip install pytest coverage
             mkdir -p test_output
-            coverage run -m pytest tests/unittests --junitxml=test_output/report.xml
+            coverage run --source=tap_twilio -m pytest tests/unittests --junitxml=test_output/report.xml
       - run:
           name: 'Coverage Report'
           command: |
             source /usr/local/share/virtualenvs/tap-twilio/bin/activate
-            coverage report -m | tee coverage.txt
+            coverage report -m --fail-under=100
             coverage html
       - store_test_results:
           path: test_output/report.xml

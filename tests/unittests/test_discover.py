@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from singer.catalog import Catalog
 
-from tap_twilio.discover import discover, check_stream_access
+from tap_twilio.discover import discover, check_stream_access, _apply_access_checks
 from tap_twilio.client import (
     TwilioUnauthorizedError,
     TwilioForbiddenError,
@@ -161,6 +161,26 @@ class TestDiscover(unittest.TestCase):
         self.assertNotIn('available_phone_numbers_toll_free', stream_ids)
         # other streams unaffected
         self.assertIn('accounts', stream_ids)
+
+    @patch('tap_twilio.discover.check_stream_access', return_value=True)
+    def test_apply_access_checks_skips_missing_child_schema_and_missing_config(self, _mock_check):
+        """Covers defensive continue branches for child stream pruning prechecks."""
+        schemas = {
+            'accounts': {'type': 'object', 'properties': {}},
+            'orphan_child': {'type': 'object', 'properties': {}},
+        }
+        field_metadata = {'accounts': [], 'orphan_child': []}
+        flat_streams = {
+            'missing_in_schemas': {'parent_stream': 'accounts'},
+            'orphan_child': {'parent_stream': 'accounts'},
+        }
+        client = MagicMock()
+        client.account_sid = 'AC123'
+
+        _apply_access_checks(client, schemas, field_metadata, flat_streams)
+
+        self.assertIn('accounts', schemas)
+        self.assertIn('orphan_child', schemas)
 
 
 if __name__ == '__main__':
