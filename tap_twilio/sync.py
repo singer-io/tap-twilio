@@ -131,13 +131,14 @@ def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_fie
     :return:
     """
     # Get the latest bookmark for the stream and set the last_integer/datetime
-    last_datetime = get_bookmark(state, stream_name, start_date)
+    saved_bookmark = get_bookmark(state, stream_name, start_date)
+    last_datetime = saved_bookmark
     if stream_name == "messages":
         # The API supports querying only by date_sent, not date_updated.
         # To retrieve updates for the past some days, lookback_window is used.
         last_datetime =  strftime(strptime_to_utc(last_datetime) - timedelta(days=lookback_window))
 
-    max_bookmark_value = last_datetime
+    max_bookmark_value = saved_bookmark
     LOGGER.info('stream: {}, bookmark_field: {}, last_datetime: {}'.format(
         stream_name, bookmark_field, last_datetime))
 
@@ -321,6 +322,9 @@ def sync_endpoint(
                     if child_stream_name in selected_streams or child_stream_name in required_streams:
                         LOGGER.info('START Syncing: {}'.format(child_stream_name))
                         write_schema(catalog, child_stream_name)
+                        child_bookmark_field = next(iter(child_endpoint_config.get(
+                            'replication_keys', [])), None)
+                        child_synced = False
                         parent_id_field = None
                         # For each parent record
                         for record in transformed_data:
@@ -355,10 +359,9 @@ def sync_endpoint(
                                 child_path = record.get('_subresource_uris', {}).get(
                                     child_endpoint_config.get('sub_resource_key',
                                                               child_stream_name))
-                            child_bookmark_field = next(iter(child_endpoint_config.get(
-                                'replication_keys', [])), None)
 
                             if child_path:
+                                child_synced = True
                                 child_total_records = sync_endpoint(
                                     client=client,
                                     config=config,
@@ -386,6 +389,11 @@ def sync_endpoint(
                                 'FINISHED Sync for Stream: {}, parent_id: {}, total_records: {}' \
                                     .format(child_stream_name, parent_id, child_total_records))
                             # End transformed data record loop
+                        if not child_synced and child_bookmark_field and \
+                                child_endpoint_config.get('replication_method') == 'INCREMENTAL':
+                            existing_child_bookmark = get_bookmark(state, child_stream_name, None)
+                            if existing_child_bookmark is None:
+                                write_bookmark(state, child_stream_name, start_date)
                         # End if child in selected streams
                     # End child streams for parent
                 # End if children

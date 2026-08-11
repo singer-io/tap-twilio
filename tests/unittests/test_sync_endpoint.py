@@ -26,6 +26,75 @@ class _ListWithGet(list):
 
 
 class TestSyncEndpoint(unittest.TestCase):
+    @mock.patch("tap_twilio.sync.write_schema")
+    @mock.patch("tap_twilio.sync.write_bookmark")
+    @mock.patch("tap_twilio.sync.process_records", return_value=("2022-01-02T00:00:00Z", 1))
+    @mock.patch("tap_twilio.sync.transform_json", return_value=[{
+        "id": "PARENT_ID",
+        "account_sid": "AC999",
+        "_subresource_uris": {}
+    }])
+    @mock.patch("tap_twilio.sync.get_dates")
+    def test_sync_endpoint_initializes_incremental_child_bookmark_when_no_child_path(
+            self,
+            mock_get_dates,
+            _mock_transform_json,
+            _mock_process_records,
+            mock_write_bookmark,
+            mock_write_schema):
+        start = datetime(2022, 1, 1, tzinfo=timezone.utc)
+        end = datetime(2022, 1, 2, tzinfo=timezone.utc)
+        now = datetime(2022, 1, 2, tzinfo=timezone.utc)
+        mock_get_dates.return_value = (
+            start,
+            end,
+            1,
+            now,
+            "2022-01-01T00:00:00Z",
+            "2022-01-01T00:00:00Z",
+        )
+
+        client = mock.MagicMock()
+        client.get.return_value = {
+            "messages": [{"id": "PARENT_ID"}],
+            "next_page_uri": None,
+        }
+
+        endpoint_config = {
+            "api_url": "https://api.twilio.com",
+            "api_version": "2010-04-01",
+            "data_key": "messages",
+            "replication_keys": ["date_sent"],
+            "path": "Messages",
+            "key_properties": ["sid", "id"],
+            "children": {
+                "message_media": {
+                    "sub_resource_key": "media",
+                    "replication_method": "INCREMENTAL",
+                    "replication_keys": ["date_updated"],
+                }
+            },
+        }
+
+        state = {"bookmarks": {"messages": "2022-01-01T00:00:00Z"}}
+        sync_endpoint(
+            client=client,
+            config={"date_window_days": "1", "lookback_window": "15"},
+            catalog=DummyCatalog(),
+            state=state,
+            start_date="2022-01-01T00:00:00Z",
+            stream_name="messages",
+            path="Messages",
+            endpoint_config=endpoint_config,
+            bookmark_field="date_sent",
+            selected_streams=["messages", "message_media"],
+            date_window_days=1,
+            required_streams=["messages", "message_media"],
+        )
+
+        self.assertTrue(mock_write_schema.called)
+        mock_write_bookmark.assert_any_call(state, "message_media", "2022-01-01T00:00:00Z")
+
     @mock.patch("tap_twilio.sync.write_bookmark")
     @mock.patch("tap_twilio.sync.process_records")
     @mock.patch("tap_twilio.sync.transform_json")

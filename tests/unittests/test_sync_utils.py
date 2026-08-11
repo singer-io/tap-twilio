@@ -78,7 +78,7 @@ class TestSyncUtils(unittest.TestCase):
         mock_now.return_value = datetime(2022, 1, 10, tzinfo=timezone.utc)
         state = {"bookmarks": {"messages": "2022-01-08T00:00:00Z"}}
 
-        _start_window, _end_window, _window_days, _now_dt, last_dt, _max_bm = sync_module.get_dates(
+        _start_window, _end_window, _window_days, _now_dt, last_dt, max_bm = sync_module.get_dates(
             state=state,
             stream_name="messages",
             start_date="2021-01-01T00:00:00Z",
@@ -92,6 +92,10 @@ class TestSyncUtils(unittest.TestCase):
         self.assertEqual(
             strptime_to_utc(last_dt),
             strptime_to_utc("2022-01-05T00:00:00Z"),
+        )
+        self.assertEqual(
+            strptime_to_utc(max_bm),
+            strptime_to_utc("2022-01-08T00:00:00Z"),
         )
 
     @mock.patch("tap_twilio.sync.utils.now")
