@@ -3,7 +3,7 @@
 
 ## 0.3.0
   * Added Parent Relationship to the child streams for metadata [#18](https://github.com/singer-io/tap-twilio/pull/18)
-  * Exclude inaccessible streams (401/403/404/405) from catalog during discovery [#21](https://github.com/singer-io/tap-twilio/pull/21)
+  * Exclude inaccessible streams (401/403) from catalog during discovery [#21](https://github.com/singer-io/tap-twilio/pull/21)
 
 # 0.2.2
   * Bump requests to 2.33.0 for security updates [#20](https://github.com/singer-io/tap-twilio/pull/20)
