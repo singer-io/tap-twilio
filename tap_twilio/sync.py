@@ -399,6 +399,9 @@ def sync_endpoint(
                                     LOGGER.info(
                                         'No child stream {} for parent stream {} in subresource uris'
                                         .format(child_stream_name, stream_name))
+                                    if child_endpoint_config.get('replication_method') == 'INCREMENTAL' and \
+                                            get_bookmark(state, child_stream_name, None) is None:
+                                        write_bookmark(state, child_stream_name, last_datetime)
                                     child_total_records = 0
                                 LOGGER.info(
                                     'FINISHED Sync for Stream: {}, parent_id: {}, total_records: {}' \
