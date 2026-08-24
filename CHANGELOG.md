@@ -1,9 +1,10 @@
 # Changelog
 
 
-## 0.4.0
+## 1.0.0
   * Added Parent Relationship to the child streams for metadata [#18](https://github.com/singer-io/tap-twilio/pull/18)
   * Exclude inaccessible streams (401/403) from catalog during discovery [#21](https://github.com/singer-io/tap-twilio/pull/21)
+  * Major version bump due to child stream replication change
 
 # 0.3.0
   * **CRITICAL**: Add Status parameter to conferences stream to fetch all statuses (init, in-progress, completed). 
