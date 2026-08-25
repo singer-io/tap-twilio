@@ -339,6 +339,12 @@ def sync_endpoint(
                         if child_stream_name in selected_streams or child_stream_name in required_streams:
                             LOGGER.info('START Syncing: {}'.format(child_stream_name))
                             write_schema(catalog, child_stream_name)
+
+                            if child_endpoint_config.get('replication_method') == 'INCREMENTAL' and \
+                                    not transformed_data and \
+                                    get_bookmark(state, child_stream_name, None) is None:
+                                write_bookmark(state, child_stream_name, last_datetime)
+
                             parent_id_field = None
                             # For each parent record
                             for record in transformed_data:
