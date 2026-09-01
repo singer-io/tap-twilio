@@ -90,14 +90,16 @@ class TwilioBaseTest(unittest.TestCase):
                 self.PRIMARY_KEYS: {"account_sid"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 1,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: False,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "addresses": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "alerts": {
                 self.PRIMARY_KEYS: {"sid"},
@@ -111,126 +113,148 @@ class TwilioBaseTest(unittest.TestCase):
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "available_phone_number_countries": {
                 self.PRIMARY_KEYS: {"country_code"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: False,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "available_phone_numbers_local": {
                 self.PRIMARY_KEYS: {"iso_country", "phone_number"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: False,
+                self.EXPECTED_PARENT_STREAM: "available_phone_number_countries"
             },
             "available_phone_numbers_mobile": {
                 self.PRIMARY_KEYS: {"iso_country", "phone_number"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: False,
+                self.EXPECTED_PARENT_STREAM: "available_phone_number_countries"
             },
             "available_phone_numbers_toll_free": {
                 self.PRIMARY_KEYS: {"iso_country", "phone_number"},
                 self.REPLICATION_METHOD: self.FULL_TABLE,
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: False,
+                self.EXPECTED_PARENT_STREAM: "available_phone_number_countries"
             },
             "calls": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "conference_participants": {
                 self.PRIMARY_KEYS: {"uri"},
-                self.REPLICATION_METHOD: self.FULL_TABLE,
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "conferences"
             },
             "conferences": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "dependent_phone_numbers": {
                 self.PRIMARY_KEYS: {"sid"},
-                self.REPLICATION_METHOD: self.FULL_TABLE,
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "addresses"
             },
             "incoming_phone_numbers": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "keys": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "message_media": {
                 self.PRIMARY_KEYS: {"sid"},
-                self.REPLICATION_METHOD: self.FULL_TABLE,
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: False
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "messages"
             },
             "messages": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_sent"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "outgoing_caller_ids": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "queues": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "recordings": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_created"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "transcriptions": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "usage_records": {
                 self.PRIMARY_KEYS: {"account_sid", "category", "start_date"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"start_date"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             },
             "usage_triggers": {
                 self.PRIMARY_KEYS: {"sid"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.REPLICATION_KEYS: {"date_updated"},
                 self.EXPECTED_PAGE_SIZE: 50,
-                self.OBEYS_START_DATE: True
+                self.OBEYS_START_DATE: True,
+                self.EXPECTED_PARENT_STREAM: "accounts"
             }
         }
 

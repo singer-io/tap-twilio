@@ -31,6 +31,11 @@ def get_schemas():
         if stream_metadata.get('replication_keys') is not None:
             for key in stream_metadata.get('replication_keys'):
                 mdata = write(mdata, ("properties", key), "inclusion", "automatic")
+
+        parent_stream = stream_metadata.get('parent_stream')
+        if parent_stream:
+            mdata.setdefault((), {}).update({"parent-tap-stream-id": parent_stream})
+
         mdata = to_list(mdata)
         field_metadata[stream_name] = mdata
 

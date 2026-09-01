@@ -131,13 +131,14 @@ def get_dates(state, stream_name, start_date, bookmark_field, bookmark_query_fie
     :return:
     """
     # Get the latest bookmark for the stream and set the last_integer/datetime
-    last_datetime = get_bookmark(state, stream_name, start_date)
+    saved_bookmark = get_bookmark(state, stream_name, start_date)
+    last_datetime = saved_bookmark
     if stream_name == "messages":
         # The API supports querying only by date_sent, not date_updated.
         # To retrieve updates for the past some days, lookback_window is used.
         last_datetime =  strftime(strptime_to_utc(last_datetime) - timedelta(days=lookback_window))
 
-    max_bookmark_value = last_datetime
+    max_bookmark_value = saved_bookmark
     LOGGER.info('stream: {}, bookmark_field: {}, last_datetime: {}'.format(
         stream_name, bookmark_field, last_datetime))
 
@@ -338,6 +339,12 @@ def sync_endpoint(
                         if child_stream_name in selected_streams or child_stream_name in required_streams:
                             LOGGER.info('START Syncing: {}'.format(child_stream_name))
                             write_schema(catalog, child_stream_name)
+
+                            if child_endpoint_config.get('replication_method') == 'INCREMENTAL' and \
+                                    not transformed_data and \
+                                    get_bookmark(state, child_stream_name, None) is None:
+                                write_bookmark(state, child_stream_name, last_datetime)
+
                             parent_id_field = None
                             # For each parent record
                             for record in transformed_data:
@@ -398,6 +405,9 @@ def sync_endpoint(
                                     LOGGER.info(
                                         'No child stream {} for parent stream {} in subresource uris'
                                         .format(child_stream_name, stream_name))
+                                    if child_endpoint_config.get('replication_method') == 'INCREMENTAL' and \
+                                            get_bookmark(state, child_stream_name, None) is None:
+                                        write_bookmark(state, child_stream_name, last_datetime)
                                     child_total_records = 0
                                 LOGGER.info(
                                     'FINISHED Sync for Stream: {}, parent_id: {}, total_records: {}' \

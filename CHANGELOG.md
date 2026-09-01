@@ -1,5 +1,11 @@
 # Changelog
 
+
+## 1.0.0
+  * Added Parent Relationship to the child streams for metadata [#18](https://github.com/singer-io/tap-twilio/pull/18)
+  * Exclude inaccessible streams (401/403) from catalog during discovery [#21](https://github.com/singer-io/tap-twilio/pull/21)
+  * Major version bump due to child stream replication change
+
 # 0.3.0
   * **CRITICAL**: Add Status parameter to conferences stream to fetch all statuses (init, in-progress, completed). 
     Twilio will default to in-progress only starting July 13, 2026. Without this fix, the tap will silently stop syncing completed and init conferences after that date.
@@ -8,7 +14,6 @@
 
 # 0.2.2
   * Bump requests to 2.33.0 for security updates [#20](https://github.com/singer-io/tap-twilio/pull/20)
-
 
 ## 0.2.1
   * Bump dependency versions for twistlock compliance [#12](https://github.com/singer-io/tap-twilio/pull/12)

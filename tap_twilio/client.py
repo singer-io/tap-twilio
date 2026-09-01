@@ -105,6 +105,10 @@ class TwilioClient:
         self.__verified = self.check_access()
         return self
 
+    @property
+    def account_sid(self):
+        return self.__account_sid
+
     def __exit__(self, exception_type, exception_value, traceback):
         self.__session.close()
 

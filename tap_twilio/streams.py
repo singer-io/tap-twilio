@@ -56,7 +56,8 @@ STREAMS = {
                         'path': 'Accounts/{AccountSid}/Addresses/{ParentId}/DependentPhoneNumbers.json',
                         'data_key': 'dependent_phone_numbers',
                         'key_properties': ['sid'],
-                        'replication_method': 'FULL_TABLE',  # ALL for parent Address
+                        'replication_method': 'INCREMENTAL',  # ALL for parent Message
+                        'replication_keys': ['date_updated'],
                         'params': {},
                         'pagingation': 'root',
                         'parent': 'address'
@@ -199,7 +200,8 @@ STREAMS = {
                         'data_key': 'participants',
                         'sub_resource_key': 'participants',
                         'key_properties': ['uri'],
-                        'replication_method': 'FULL_TABLE',  # ALL for parent Conference
+                        'replication_method': 'INCREMENTAL',  # ALL for parent Conference
+                        'replication_keys': ['date_updated'],
                         'params': {},
                         'pagingation': 'root'
                     }
@@ -283,7 +285,8 @@ STREAMS = {
                         'data_key': 'media_list',
                         'sub_resource_key': 'media',
                         'key_properties': ['sid'],
-                        'replication_method': 'FULL_TABLE',  # ALL for parent Address
+                        'replication_method': 'INCREMENTAL',  # ALL for parent Address
+                        'replication_keys': ['date_updated'],
                         'params': {},
                         'pagingation': 'root'
                     }
